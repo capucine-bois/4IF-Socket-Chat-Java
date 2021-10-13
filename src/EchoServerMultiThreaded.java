@@ -1,0 +1,72 @@
+import java.io.*;
+import java.net.*;
+import java.util.*;
+
+public class EchoServerMultiThreaded  {
+
+ 	/**
+  	* main method
+	* @param EchoServer port
+  	* 
+  	**/
+       public static void main(String args[]){ 
+        ServerSocket listenSocket;
+        Map<User,Socket> listeClients = new HashMap<User,Socket>();
+		ArrayList<Groupe> listeGroupes =  new ArrayList<>();
+                
+  	if (args.length != 1) {
+          System.out.println("Usage: java EchoServer <EchoServer port>");
+          System.exit(1);
+  	}
+	try {
+        BufferedReader socIn = null ;
+		listenSocket = new ServerSocket(Integer.parseInt(args[0])); //port
+        String pseudo = "";
+		System.out.println("Server ready...");
+		PrintStream socOut = null;
+		User user = null;
+		while (true) {
+			Socket clientSocket = listenSocket.accept();
+            socIn= new BufferedReader(
+    			new InputStreamReader(clientSocket.getInputStream())); 
+			System.out.println("Connexion from:" + clientSocket.getInetAddress());
+
+			pseudo = socIn.readLine();
+			User userPrec = getUserByPseudo(pseudo, listeClients);
+			if (userPrec != null && listeClients.containsKey(userPrec)){
+            	// si le client se reconnecte
+				listeClients.replace(userPrec, clientSocket);
+			}else{
+				user = new User(pseudo);
+				listeClients.put(user, clientSocket);
+			}
+			//initialisation du client
+			ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, listeGroupes);
+			System.out.println(listeGroupes);
+			//informer le client des gens déjà connectés
+			for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
+				socOut = new PrintStream(entry.getValue().getOutputStream());
+				if(!entry.getKey().getPseudo().equals(pseudo)) socOut.println(pseudo + " est connecte.");
+			}
+			PrintStream socOutActuelle = new PrintStream(clientSocket.getOutputStream());
+			// Afficher la liste des personnes déjà connectés
+			for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
+				if(!entry.getKey().getPseudo().equals(pseudo)) socOutActuelle.println(entry.getKey().getPseudo() + " est connecte.");
+			}
+			ct.start();
+		}
+        } catch (Exception e) {
+            System.err.println("Error in EchoServer:" + e);
+        }
+      }
+
+      public static User getUserByPseudo(String pseudo, Map<User, Socket> liste){
+       	User userPrec = null;
+		  for (Map.Entry<User, Socket> entry : liste.entrySet()) {
+			  if(entry.getKey().getPseudo()==pseudo) userPrec = entry.getKey();
+		  }
+		  return userPrec;
+	  }
+  }
+
+  
