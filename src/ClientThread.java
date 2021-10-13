@@ -31,10 +31,6 @@ public class ClientThread
 		return identifiant;
 	}
 
-	/**
-  	* receives a request from client then sends an echo to the client
-  	* @param clientSocket the client socket
-  	**/
 	public void run() {
     	  try {
     		BufferedReader socIn = null;
@@ -44,45 +40,22 @@ public class ClientThread
 			User userActuel = getUserByPseudo(identifiant,listeClients);
     		while (true) {
 				String line = socIn.readLine();
-
 				if (line.substring(0, 1).equals("1")) {
-					//on veut créer un groupe
-					Groupe groupe = new Groupe(userActuel, line.substring(1, line.length()));
-					if(groupe!=null) {
-						listeGroupes.add(groupe);
-						listeGroupesUser.add(groupe);
+				//on veut afficher tous les users connectés
+					String catalogueUsersConnectes = "";
+					for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
+						if(entry.getKey().connecte){
+							catalogueUsersConnectes+=entry.getKey().getPseudo();
+							catalogueUsersConnectes+="\n";
+						}
 					}
-					socOut.println("Groupe bien ajoute!");
-					System.out.println("taille liste des groupes"+listeGroupes.size() + "\n premier : "+listeGroupes.get(0).getNom() );
-				}else if(line.substring(0, 1).equals("3")){
-					//on veut rejoindre un groupe existant
-					String groupeChoisi = line.substring(1, line.length());
-					if(Integer.parseInt(groupeChoisi)>=listeGroupes.size()){
-					    socOut.println("retour_menu: Ce groupe n'existe pas, cliquez sur Entree pour revenir au Menu");
-                    }else {
-                        Groupe groupeChoisiParUser = listeGroupes.get(Integer.parseInt(groupeChoisi));
-                        if (!listeGroupesUser.contains(groupeChoisiParUser)) { //si le client n'est pas encore dans le groupe, on le rajoute
-                            groupeChoisiParUser.addUser(userActuel); // on ajoute l'utilisateur au groupe
-                            listeGroupesUser.add(groupeChoisiParUser); // on ajoute le groupe à la liste de groupes associé au User
-                        }
-                        userActuel.setGroupeActuel(groupeChoisiParUser);
-                    }
-				}else if(line.substring(0, 1).equals("2")){
-					//pour pouvoir tester, je crée quelques groupes que j'ajoute à la listeGroupes
-					Groupe g1 = new Groupe(userActuel, "Groupe1");
-					Groupe g2 = new Groupe(userActuel, "Groupe2");
-					listeGroupes.add(g1);
-					listeGroupes.add(g2);
-
-					//on veut envoyer le catalogue des groupes au client
-					String catalogueGroupes = "";
-					for(int j= 0; j<listeGroupes.size(); j++){
-						catalogueGroupes+=listeGroupes.get(j).getNom();
-						catalogueGroupes+= "   Groupe numero ";
-						catalogueGroupes+= j;
-						catalogueGroupes+= "\n";
-					}
-					socOut.println(catalogueGroupes);
+					System.out.println(catalogueUsersConnectes);
+					catalogueUsersConnectes+="end";
+					socOut.println("users_co "+catalogueUsersConnectes);
+					/*le code users_co est envoyé au thread de Client pour lui indiquer
+					qu'il doit traiter cette demande particulièrement, ici cela
+					indique que le serveur lui envoie la liste des clients connectés
+					 */
 				}else{
 				//DISCUSSION BASIQUE
 				for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {

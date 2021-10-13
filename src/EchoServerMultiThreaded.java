@@ -24,7 +24,7 @@ public class EchoServerMultiThreaded  {
         String pseudo = "";
 		System.out.println("Server ready...");
 		PrintStream socOut = null;
-		User user = null;
+		User user ;
 		while (true) {
 			Socket clientSocket = listenSocket.accept();
             socIn= new BufferedReader(
@@ -34,11 +34,13 @@ public class EchoServerMultiThreaded  {
 			pseudo = socIn.readLine();
 			User userPrec = getUserByPseudo(pseudo, listeClients);
 			if (userPrec != null && listeClients.containsKey(userPrec)){
-            	// si le client se reconnecte
+            	// si le client se reconnecte (et donc existe deja dans la base, il n'est pas nouveau)
 				listeClients.replace(userPrec, clientSocket);
+				userPrec.setStatut(true);
 			}else{
 				user = new User(pseudo);
 				listeClients.put(user, clientSocket);
+				user.setStatut(true);
 			}
 			//initialisation du client
 			ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, listeGroupes);
