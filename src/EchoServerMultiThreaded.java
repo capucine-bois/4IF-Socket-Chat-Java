@@ -4,11 +4,7 @@ import java.util.*;
 
 public class EchoServerMultiThreaded  {
 
- 	/**
-  	* main method
-	* @param EchoServer port
-  	* 
-  	**/
+
        public static void main(String args[]){ 
         ServerSocket listenSocket;
         Map<User,Socket> listeClients = new HashMap<User,Socket>();
@@ -33,8 +29,8 @@ public class EchoServerMultiThreaded  {
 
 			pseudo = socIn.readLine();
 			User userPrec = getUserByPseudo(pseudo, listeClients);
+			// si le client se reconnecte (et donc existe deja dans la base, il n'est pas nouveau)
 			if (userPrec != null && listeClients.containsKey(userPrec)){
-            	// si le client se reconnecte (et donc existe deja dans la base, il n'est pas nouveau)
 				listeClients.replace(userPrec, clientSocket);
 				userPrec.setStatut(true);
 			}else{
@@ -44,16 +40,18 @@ public class EchoServerMultiThreaded  {
 			}
 			//initialisation du client
 			ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, listeGroupes);
-			System.out.println(listeGroupes);
+
+			//System.out.println(listeGroupes);
+
 			//informer le client des gens déjà connectés
 			for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
 				socOut = new PrintStream(entry.getValue().getOutputStream());
-				if(!entry.getKey().getPseudo().equals(pseudo)) socOut.println(pseudo + " est connecte.");
+				if(!entry.getKey().getPseudo().equals(pseudo) && entry.getKey().getEtat()) socOut.println(pseudo + " est connecte.");
 			}
 			PrintStream socOutActuelle = new PrintStream(clientSocket.getOutputStream());
 			// Afficher la liste des personnes déjà connectés
 			for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
-				if(!entry.getKey().getPseudo().equals(pseudo)) socOutActuelle.println(entry.getKey().getPseudo() + " est connecte.");
+				if(!entry.getKey().getPseudo().equals(pseudo) && entry.getKey().getEtat()) socOutActuelle.println(entry.getKey().getPseudo() + " est connecte.");
 			}
 			ct.start();
 		}

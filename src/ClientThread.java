@@ -17,6 +17,7 @@ public class ClientThread
 		this.listeClients=liste;
         this.identifiant = id;
 		this.clientSocket = s;
+		/*
 		if(listeGroupes != null) {
 			this.listeGroupes = listeGroupes;
 			for (int i = 0; i < listeGroupes.size(); i++) {
@@ -24,7 +25,7 @@ public class ClientThread
 					this.listeGroupesUser.add(listeGroupes.get(i));
 				}
 			}
-		}
+		}*/
 	}
 
 	public String getIdentifiant(){
@@ -40,14 +41,38 @@ public class ClientThread
 			User userActuel = getUserByPseudo(identifiant,listeClients);
     		while (true) {
 				String line = socIn.readLine();
-				//DISCUSSION BASIQUE
-				for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
-					//if(entry.getValue() = socketDuGroupe)
-					if (!entry.getKey().getPseudo().equals(identifiant)) {
-						socOutClients = new PrintStream(entry.getValue().getOutputStream());
-						socOutClients.println(identifiant + ": " + line);
+				//pour sauter une ligne dans les listes d'utilisateur
+				String sautDeLigne=System.getProperty("line.separator");
+				if(line.equals("Afficher listeClients")) { // si le client a demandé à voir la liste des clients
+					String listeToPrint = "";
+					for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
+						if (!entry.getKey().getPseudo().equals(identifiant)) {
+							listeToPrint+=entry.getKey().getPseudo()+sautDeLigne;
+						}
+					}
+					socOut.println(listeToPrint);
+
+				} else if (line.equals("Afficher clients connectés")) { // si le client veut voir seulement les clients connectés
+					String listeToPrint = "";
+					for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
+						if (!entry.getKey().getPseudo().equals(identifiant) && entry.getKey().getEtat()) { // on teste si l'utilisateur est connecté
+							listeToPrint+=entry.getKey().getPseudo()+sautDeLigne;
+						}
+					}
+					socOut.println(listeToPrint);
+				} else if(line.equals("deconnexion")) {
+					userActuel.setEtat(false);
+				}  {
+					//DISCUSSION BASIQUE
+					for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
+						//if(entry.getValue() = socketDuGroupe)
+						if (!entry.getKey().getPseudo().equals(identifiant)) {
+							socOutClients = new PrintStream(entry.getValue().getOutputStream());
+							socOutClients.println(identifiant + ": " + line);
+						}
 					}
 				}
+
 				System.out.println(identifiant + " a dit " + line);
     		}
     	} catch (Exception e) {
