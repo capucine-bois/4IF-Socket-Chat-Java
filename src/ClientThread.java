@@ -17,7 +17,6 @@ public class ClientThread
 		this.listeClients=liste;
         this.identifiant = id;
 		this.clientSocket = s;
-		/*
 		if(listeGroupes != null) {
 			this.listeGroupes = listeGroupes;
 			for (int i = 0; i < listeGroupes.size(); i++) {
@@ -25,7 +24,7 @@ public class ClientThread
 					this.listeGroupesUser.add(listeGroupes.get(i));
 				}
 			}
-		}*/
+		}
 	}
 
 	public String getIdentifiant(){
@@ -80,7 +79,6 @@ public class ClientThread
 					}
 
 				}
-
 				System.out.println(identifiant + " a dit " + line);
     		}
     	} catch (Exception e) {
