@@ -39,6 +39,7 @@ public class ClientThread
 			PrintStream socOutClients = null;
 			PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
 			User userActuel = getUserByPseudo(identifiant,listeClients);
+			String interlocuteur = "";
     		while (true) {
 				String line = socIn.readLine();
 				//pour sauter une ligne dans les listes d'utilisateur
@@ -62,15 +63,22 @@ public class ClientThread
 					socOut.println(listeToPrint);
 				} else if(line.equals("deconnexion")) {
 					userActuel.setEtat(false);
-				}  {
+				} else  {
 					//DISCUSSION BASIQUE
+					if (line.substring(0, 2).equals("1:")) {
+						//le client a choisi quelqu'un a qui parler
+						interlocuteur = line.substring(2,line.length());
+					}
 					for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
-						//if(entry.getValue() = socketDuGroupe)
-						if (!entry.getKey().getPseudo().equals(identifiant)) {
+						System.out.println("o passe dans le for");
+						if (entry.getKey().getPseudo().equals(interlocuteur)) {
+							System.out.println("on passe dans le if");
 							socOutClients = new PrintStream(entry.getValue().getOutputStream());
 							socOutClients.println(identifiant + ": " + line);
+							break;
 						}
 					}
+
 				}
 
 				System.out.println(identifiant + " a dit " + line);
@@ -83,7 +91,7 @@ public class ClientThread
        public static User getUserByPseudo(String pseudo, Map<User, Socket> liste){
 		   User userPrec = null;
 		   for (Map.Entry<User, Socket> entry : liste.entrySet()) {
-			   if(entry.getKey().getPseudo()==pseudo){
+			   if(entry.getKey().getPseudo().equals(pseudo)){
 			   	userPrec = entry.getKey();
 			   	break;
 			   }

@@ -63,7 +63,7 @@ public class EchoServerMultiThreaded  {
       public static User getUserByPseudo(String pseudo, Map<User, Socket> liste){
        	User userPrec = null;
 		  for (Map.Entry<User, Socket> entry : liste.entrySet()) {
-			  if(entry.getKey().getPseudo()==pseudo) userPrec = entry.getKey();
+			  if(entry.getKey().getPseudo().equals(pseudo)) userPrec = entry.getKey();
 		  }
 		  return userPrec;
 	  }

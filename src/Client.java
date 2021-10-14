@@ -54,11 +54,8 @@ public class Client {
             }else{
                 if(i==1) {
                     String choix = choix();
-                    String action [] = afficherMenu(choix);
-                    System.out.println(action[0]);
-                    if (!action[0].equals("retour menu")) {
-                        personne = action[0];
-                        personneCo = action[1];
+                    String action = afficherMenu(choix);
+                    if (!action.equals("retour menu")) {
                         i++;
                     }
 
@@ -71,13 +68,13 @@ public class Client {
                         break; // on break quand on écrit '.'
                     }
                     //on envoie la ligne au serveur en fonction du choix de l'utilisateur
-                    if(!personne.equals("")) { // cas où l'user veut envoyer un message à une personne quelle soit co ou non
+                    /*if(!personne.equals("")) { // cas où l'user veut envoyer un message à une personne quelle soit co ou non
                         socOut.println("personne non co : " + personne + " et le message est : " + line);
                     } else if (!personneCo.equals("")) { // cas où l'utilisateur veut envoyer un message à un utilisateur connecté
                         socOut.println("personne co : " + personneCo + " et le message est : " + line);
                     } else { // on envoie un message à tout le monde
                         socOut.println(line);
-                    }
+                    }*/
 
                 }
             }
@@ -97,14 +94,16 @@ public class Client {
         return action;
     }
 
-    public String afficherListePersonnes() throws IOException {
+    public void afficherListePersonnes() throws IOException {
         // on récupère la liste des personnes qui ont un compte
         socOut.println("Afficher listeClients");
         System.out.println("Voici la liste des utilisateurs");
         System.out.println(socIn.readLine());
-        String action = stdIn.readLine();
 
-        return action;
+        // On tape le pseudo de la personne à qui on veut parler
+        System.out.println("A qui voulez vous parler");
+        String personneChoisie = stdIn.readLine();
+        socOut.println("1:"+personneChoisie);
     }
 
     public String afficherListePersonnesConnectees() throws IOException {
@@ -116,30 +115,28 @@ public class Client {
     }
 
     // méthode d'affichage du menu, en cas de choix or des propositions on rappelle la fonction
-    public String[] afficherMenu(String choix) throws IOException {
-        String personne ="", personneCo="";
-        String retour [] = new String[2];
+    public String afficherMenu(String choix) throws IOException {
+        String retour = "";
         switch(choix) {
             case "1" :
-                personne = afficherListePersonnes();
+                afficherListePersonnes();
                 // if personne bien dans la liste on passe à la suite et i++
                 // else on affiche à nouveau le menu
+
+
                 break;
             case "2" :
-                personneCo = afficherListePersonnesConnectees();
+                afficherListePersonnesConnectees();
                 // if personne bien dans la liste on passe à la suite et i++
                 // else on affiche à nouveau le menu
                 break;
             case "3" :
                 break;
             default :
-                personne = "retour menu";
+                retour = "retour menu";
                 break;
         }
-        retour[0] = personne;
-        retour[1] = personneCo;
         return retour;
-
     }
 
 }
