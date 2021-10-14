@@ -27,7 +27,6 @@ public class Client {
         String line, pseudo, nomGroupe;
         final boolean running = ok;
         // création du thread
-        // Lecture de message
         Thread t = new Thread(() -> {
             int i = 0;
             while (running) {
@@ -67,6 +66,7 @@ public class Client {
                         ok = false;
                         break; // on break quand on écrit '.'
                     }
+                    socOut.println(line);
                     //on envoie la ligne au serveur en fonction du choix de l'utilisateur
                     /*if(!personne.equals("")) { // cas où l'user veut envoyer un message à une personne quelle soit co ou non
                         socOut.println("personne non co : " + personne + " et le message est : " + line);
@@ -123,7 +123,6 @@ public class Client {
                 // if personne bien dans la liste on passe à la suite et i++
                 // else on affiche à nouveau le menu
 
-
                 break;
             case "2" :
                 afficherListePersonnesConnectees();
@@ -131,6 +130,7 @@ public class Client {
                 // else on affiche à nouveau le menu
                 break;
             case "3" :
+                socOut.println("pour tous");
                 break;
             default :
                 retour = "retour menu";

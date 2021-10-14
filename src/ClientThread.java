@@ -62,19 +62,29 @@ public class ClientThread
 					socOut.println(listeToPrint);
 				} else if(line.equals("deconnexion")) {
 					userActuel.setEtat(false);
-				} else  {
+				}
+				else if(line.length()>=2 && line.substring(0, 2).equals("1:")) {
+					//le client a choisi quelqu'un a qui parler
+					interlocuteur = line.substring(2,line.length());
+				} else if(line.length()>=9 && line.substring(0, 9).equals("pour tous")) {
+					interlocuteur = "tous";
+				} else {
 					//DISCUSSION BASIQUE
-					if (line.substring(0, 2).equals("1:")) {
-						//le client a choisi quelqu'un a qui parler
-						interlocuteur = line.substring(2,line.length());
-					}
-					for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
-						System.out.println("o passe dans le for");
-						if (entry.getKey().getPseudo().equals(interlocuteur)) {
-							System.out.println("on passe dans le if");
-							socOutClients = new PrintStream(entry.getValue().getOutputStream());
-							socOutClients.println(identifiant + ": " + line);
-							break;
+
+					if(!interlocuteur.equals("tous")) {
+						for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
+							if (entry.getKey().getPseudo().equals(interlocuteur)) {
+								socOutClients = new PrintStream(entry.getValue().getOutputStream());
+								socOutClients.println(identifiant + ": " + line);
+								break;
+							}
+						}
+					} else if(interlocuteur.equals("tous")) {
+						for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
+							if (!entry.getKey().getPseudo().equals(identifiant)) {
+								socOutClients = new PrintStream(entry.getValue().getOutputStream());
+								socOutClients.println(identifiant + " : " + line);
+							}
 						}
 					}
 
