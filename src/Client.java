@@ -32,7 +32,13 @@ public class Client {
             while (running) {
                 try {
                     String message = socIn.readLine();
-                    System.out.println(message);
+                    if(message.equals("Revenir au menu")) {
+                        System.out.println("on passe dans le if Revenur au menu du client dans le thread bonus");
+                        String choix = choix();
+                        String action = afficherMenu(choix);
+                    } else {
+                        System.out.println(message);
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                     break;
@@ -65,8 +71,13 @@ public class Client {
                         System.exit(0);
                         ok = false;
                         break; // on break quand on écrit '.'
+                    } else if (line.equals("Revenir au menu")) {
+                        i=1;
+                        System.out.println("on va retourner à 1= 1");
+                    } else {
+                        socOut.println(line);
                     }
-                    socOut.println(line);
+
                     //on envoie la ligne au serveur en fonction du choix de l'utilisateur
                     /*if(!personne.equals("")) { // cas où l'user veut envoyer un message à une personne quelle soit co ou non
                         socOut.println("personne non co : " + personne + " et le message est : " + line);
@@ -89,12 +100,14 @@ public class Client {
         System.out.println("1 : Parler à une personne");
         System.out.println("2 : Parler à une personne connectée");
         System.out.println("3 : Parler à tout le monde");
+        System.out.println("4 : Deconnexion");
         System.out.println("--------------------------");
         String action = stdIn.readLine();
         return action;
     }
 
-    public void afficherListePersonnes() throws IOException {
+    public String afficherListePersonnes() throws IOException {
+        String retour = "";
         // on récupère la liste des personnes qui ont un compte
         socOut.println("Afficher listeClients");
         System.out.println("Voici la liste des utilisateurs");
@@ -103,15 +116,30 @@ public class Client {
         // On tape le pseudo de la personne à qui on veut parler
         System.out.println("A qui voulez vous parler");
         String personneChoisie = stdIn.readLine();
-        socOut.println("1:"+personneChoisie);
+        if(personneChoisie.equals("Revenir au menu")) {
+            retour = "retour menu";
+        } else {
+            socOut.println("1:"+personneChoisie);
+        }
+        return retour;
+
     }
 
     public String afficherListePersonnesConnectees() throws IOException {
+        String retour = "";
         socOut.println("Afficher clients connectés");
         System.out.println("Voici la liste des utilisateurs connectés");
         System.out.println(socIn.readLine());
-        String action = stdIn.readLine();
-        return action;
+
+        // On tape le pseudo de la personne à qui on veut parler
+        System.out.println("A qui voulez vous parler");
+        String personneChoisie = stdIn.readLine();
+        if(personneChoisie.equals("Revenir au menu")) {
+            retour = "retour menu";
+        } else {
+            socOut.println("2:"+personneChoisie);
+        }
+        return retour;
     }
 
     // méthode d'affichage du menu, en cas de choix or des propositions on rappelle la fonction
@@ -119,18 +147,17 @@ public class Client {
         String retour = "";
         switch(choix) {
             case "1" :
-                afficherListePersonnes();
-                // if personne bien dans la liste on passe à la suite et i++
-                // else on affiche à nouveau le menu
-
+                retour = afficherListePersonnes();
                 break;
             case "2" :
-                afficherListePersonnesConnectees();
-                // if personne bien dans la liste on passe à la suite et i++
-                // else on affiche à nouveau le menu
+                retour = afficherListePersonnesConnectees();
                 break;
             case "3" :
                 socOut.println("pour tous");
+                break;
+            case "4" :
+                socOut.println("deconnexion");
+                System.exit(0);
                 break;
             default :
                 retour = "retour menu";

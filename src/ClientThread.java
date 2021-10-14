@@ -12,6 +12,9 @@ public class ClientThread
 	private ArrayList<Groupe> listeGroupes = new ArrayList<>();
 	private ArrayList<Groupe> listeGroupesUser = new ArrayList<>();
 
+	public static final String ANSI_RED = "[31mRED";
+	public static final String ANSI_RESET = "[0m";
+
 
 	ClientThread(Socket s, String id, Map<User,Socket> liste, ArrayList<Groupe> listeGroupes) {
 		this.listeClients=liste;
@@ -33,6 +36,7 @@ public class ClientThread
 
 	public void run() {
     	  try {
+
     		BufferedReader socIn = null;
     		socIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			PrintStream socOutClients = null;
@@ -63,12 +67,18 @@ public class ClientThread
 				} else if(line.equals("deconnexion")) {
 					userActuel.setEtat(false);
 				}
-				else if(line.length()>=2 && line.substring(0, 2).equals("1:")) {
+				else if(line.length()>=2 && line.substring(0, 2).equals("1:") && !line.substring(2, line.length()).equals("Revenir au menu")) {
 					//le client a choisi quelqu'un a qui parler
 					interlocuteur = line.substring(2,line.length());
 				} else if(line.length()>=9 && line.substring(0, 9).equals("pour tous")) {
 					interlocuteur = "tous";
-				} else {
+				} else if(line.length()>=2 && line.substring(0, 2).equals("2:")) {
+					interlocuteur = line.substring(2,line.length());
+				} /*else if(line.equals("Revenir au menu") || (line.length()>=2 && line.substring(0, 2).equals("1:") && line.substring(2, line.length()).equals("Revenir au menu")) || (line.length()>=2 && line.substring(0, 2).equals("2:") && line.substring(2, line.length()).equals("Revenir au menu"))) {
+					System.out.println("on passe dans le if trop bizarre");
+					socOut.println("Revenir au menu");
+				}*/
+				else {
 					//DISCUSSION BASIQUE
 
 					if(!interlocuteur.equals("tous")) {
@@ -83,7 +93,8 @@ public class ClientThread
 						for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
 							if (!entry.getKey().getPseudo().equals(identifiant)) {
 								socOutClients = new PrintStream(entry.getValue().getOutputStream());
-								socOutClients.println(identifiant + " : " + line);
+
+								socOutClients.println( identifiant + " : " + line);
 							}
 						}
 					}
