@@ -48,6 +48,7 @@ public class EchoServerMultiThreaded  {
 				socOut = new PrintStream(entry.getValue().getOutputStream());
 				if(!entry.getKey().getPseudo().equals(pseudo)) socOut.println(pseudo + " est connecte.");
 			}
+			// test
 			PrintStream socOutActuelle = new PrintStream(clientSocket.getOutputStream());
 			// Afficher la liste des personnes déjà connectés
 			for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
