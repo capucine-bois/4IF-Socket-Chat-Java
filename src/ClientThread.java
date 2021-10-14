@@ -40,33 +40,15 @@ public class ClientThread
 			User userActuel = getUserByPseudo(identifiant,listeClients);
     		while (true) {
 				String line = socIn.readLine();
-				if (line.substring(0, 1).equals("1")) {
-				//on veut afficher tous les users connectés
-					String catalogueUsersConnectes = "";
-					for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
-						if(entry.getKey().connecte){
-							catalogueUsersConnectes+=entry.getKey().getPseudo();
-							catalogueUsersConnectes+="\n";
-						}
-					}
-					System.out.println(catalogueUsersConnectes);
-					catalogueUsersConnectes+="end";
-					socOut.println("users_co "+catalogueUsersConnectes);
-					/*le code users_co est envoyé au thread de Client pour lui indiquer
-					qu'il doit traiter cette demande particulièrement, ici cela
-					indique que le serveur lui envoie la liste des clients connectés
-					 */
-				}else{
 				//DISCUSSION BASIQUE
 				for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
 					//if(entry.getValue() = socketDuGroupe)
-					if (!entry.getKey().equals(identifiant)) {
+					if (!entry.getKey().getPseudo().equals(identifiant)) {
 						socOutClients = new PrintStream(entry.getValue().getOutputStream());
 						socOutClients.println(identifiant + ": " + line);
 					}
 				}
 				System.out.println(identifiant + " a dit " + line);
-				}
     		}
     	} catch (Exception e) {
         	System.err.println("Error in EchoServer:" + e); 

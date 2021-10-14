@@ -32,14 +32,6 @@ public class Client {
             while (running) {
                 try {
                     String message = socIn.readLine();
-                    if(message.substring(0,8).equals("users_co")){
-                        Scanner sc = new Scanner(System.in);
-                        message=message.substring(10,message.length());
-                        String lecture="";
-                        while(!lecture.equals("end")){
-                            listePseudoUsersCo.add(sc.nextLine());
-                        }
-                    }
                     System.out.println(message);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -57,18 +49,9 @@ public class Client {
                 pseudo=stdIn.readLine(); //on écrit une ligne au clavier
                 socOut.println(pseudo);
                 i++;
-            } else if(i==1) {
-                System.out.println("Voici les clients connectés :");
-                socOut.println("1");
-                for(int j=0; j<listePseudoUsersCo.size(); j++){
-                    System.out.println(listePseudoUsersCo.get(j));
-                }
-                i++;
             }else{
                 line=stdIn.readLine(); //on écrit une ligne au clavier
                 if (line.equals(".")) {
-                    //socOut.println("getUser");
-
                     System.exit(0);
                     ok = false;
                     break; // on break quand on écrit '.'
@@ -81,4 +64,12 @@ public class Client {
         stdIn.close();
         echoSocket.close();
     }
+    public String choix() throws IOException{
+        System.out.println("Choisissez une action : ");
+        System.out.println("1 : parler a quelqu'un");
+        System.out.println("--------------------------");
+        String action = stdIn.readLine();
+        return action;
+    }
+
 }
