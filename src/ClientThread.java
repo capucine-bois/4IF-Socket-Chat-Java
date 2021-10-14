@@ -38,26 +38,40 @@ public class ClientThread
 			PrintStream socOutClients = null;
 			PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
 			User userActuel = getUserByPseudo(identifiant,listeClients);
-			String line = "",interlocuteur = "";
     		while (true) {
-				line = socIn.readLine();
-				//DISCUSSION BASIQUE
-				if (line.substring(0, 2).equals("1:")) {
-					System.out.println(line);
-					//le client a choisi quelqu'un a qui parler
-					System.out.println(line.substring(2,line.length()));
-					interlocuteur = line.substring(2,line.length());
-				}
-				for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
-					if (entry.getKey().getPseudo().equals(interlocuteur)) {
-						socOutClients = new PrintStream(entry.getValue().getOutputStream());
-						socOutClients.println(identifiant + ": " + line);
-						break;
+				String line = socIn.readLine();
+				//pour sauter une ligne dans les listes d'utilisateur
+				String sautDeLigne=System.getProperty("line.separator");
+				if(line.equals("Afficher listeClients")) { // si le client a demandé à voir la liste des clients
+					String listeToPrint = "";
+					for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
+						if (!entry.getKey().getPseudo().equals(identifiant)) {
+							listeToPrint+=entry.getKey().getPseudo()+sautDeLigne;
+						}
+					}
+					socOut.println(listeToPrint);
+
+				} else if (line.equals("Afficher clients connectés")) { // si le client veut voir seulement les clients connectés
+					String listeToPrint = "";
+					for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
+						if (!entry.getKey().getPseudo().equals(identifiant) && entry.getKey().getEtat()) { // on teste si l'utilisateur est connecté
+							listeToPrint+=entry.getKey().getPseudo()+sautDeLigne;
+						}
+					}
+					socOut.println(listeToPrint);
+				} else if(line.equals("deconnexion")) {
+					userActuel.setEtat(false);
+				}  {
+					//DISCUSSION BASIQUE
+					for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
+						//if(entry.getValue() = socketDuGroupe)
+						if (!entry.getKey().getPseudo().equals(identifiant)) {
+							socOutClients = new PrintStream(entry.getValue().getOutputStream());
+							socOutClients.println(identifiant + ": " + line);
+						}
 					}
 				}
-				//cote serveur on imprime toutes les conversations
 				System.out.println(identifiant + " a dit " + line);
-
     		}
     	} catch (Exception e) {
         	System.err.println("Error in EchoServer:" + e); 
