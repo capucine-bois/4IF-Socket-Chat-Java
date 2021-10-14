@@ -44,10 +44,15 @@ public class Client {
 
 
         while (ok) {
-            if(i==0){
+            if (i == 0) {
                 System.out.println("Saisissez votre identifiant");
-                pseudo=stdIn.readLine(); //on écrit une ligne au clavier
+                pseudo = stdIn.readLine(); //on écrit une ligne au clavier
                 socOut.println(pseudo);
+                i++;
+            } else  if(i==1){
+                System.out.println("A qui voulez vous parler");
+                line=stdIn.readLine(); //on écrit une ligne au clavier
+                socOut.println("1:"+line);
                 i++;
             }else{
                 line=stdIn.readLine(); //on écrit une ligne au clavier

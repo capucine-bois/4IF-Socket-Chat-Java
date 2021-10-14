@@ -4,11 +4,6 @@ import java.util.*;
 
 public class EchoServerMultiThreaded  {
 
- 	/**
-  	* main method
-	* @param EchoServer port
-  	* 
-  	**/
        public static void main(String args[]){ 
         ServerSocket listenSocket;
         Map<User,Socket> listeClients = new HashMap<User,Socket>();
@@ -65,7 +60,9 @@ public class EchoServerMultiThreaded  {
       public static User getUserByPseudo(String pseudo, Map<User, Socket> liste){
        	User userPrec = null;
 		  for (Map.Entry<User, Socket> entry : liste.entrySet()) {
-			  if(entry.getKey().getPseudo()==pseudo) userPrec = entry.getKey();
+			  if(entry.getKey().getPseudo().equals(pseudo)) {
+			  	userPrec = entry.getKey();
+			  }
 		  }
 		  return userPrec;
 	  }

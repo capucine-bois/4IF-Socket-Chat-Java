@@ -38,17 +38,26 @@ public class ClientThread
 			PrintStream socOutClients = null;
 			PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
 			User userActuel = getUserByPseudo(identifiant,listeClients);
+			String line = "",interlocuteur = "";
     		while (true) {
-				String line = socIn.readLine();
+				line = socIn.readLine();
 				//DISCUSSION BASIQUE
+				if (line.substring(0, 2).equals("1:")) {
+					System.out.println(line);
+					//le client a choisi quelqu'un a qui parler
+					System.out.println(line.substring(2,line.length()));
+					interlocuteur = line.substring(2,line.length());
+				}
 				for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
-					//if(entry.getValue() = socketDuGroupe)
-					if (!entry.getKey().getPseudo().equals(identifiant)) {
+					if (entry.getKey().getPseudo().equals(interlocuteur)) {
 						socOutClients = new PrintStream(entry.getValue().getOutputStream());
 						socOutClients.println(identifiant + ": " + line);
+						break;
 					}
 				}
+				//cote serveur on imprime toutes les conversations
 				System.out.println(identifiant + " a dit " + line);
+
     		}
     	} catch (Exception e) {
         	System.err.println("Error in EchoServer:" + e); 
