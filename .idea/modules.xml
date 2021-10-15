@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/TP_Socket.iml" filepath="$PROJECT_DIR$/TP_Socket.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tp-socket.iml" filepath="$PROJECT_DIR$/tp-socket.iml" />
     </modules>
   </component>
 </project>

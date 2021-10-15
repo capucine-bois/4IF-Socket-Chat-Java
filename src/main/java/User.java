@@ -16,6 +16,8 @@ public class User {
         this.connecte=false;
     }
 
+    public User () {}
+
     public void addGroupe(Groupe groupe){
         myGroups.add(groupe);
     }
