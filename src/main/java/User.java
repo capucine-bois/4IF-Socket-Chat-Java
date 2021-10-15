@@ -28,8 +28,6 @@ public class User {
 
     public String getPseudo(){  return pseudo;  }
 
-    public void setStatut(boolean statut){connecte=statut;}
-
     public boolean getEtat() {
         return connecte;
     }

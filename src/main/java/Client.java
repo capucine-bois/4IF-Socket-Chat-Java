@@ -31,15 +31,23 @@ public class Client {
         final boolean running = ok;
         // création du thread
         Thread t = new Thread(() -> {
-            int i = 0;
             while (running) {
                 try {
                     String message = socIn.readLine();
-                    if(message.equals("Revenir au menu")) {
-                        System.out.println("on passe dans le if Revenur au menu du client dans le thread bonus");
+                    if (message.equals("Revenir au menu")) {
                         String choix = choix();
                         String action = afficherMenu(choix);
-                    } else {
+                    } else if (message.length()>=13 && message.substring(0,13).equals("erreur_pseudo")){
+                        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+                        System.out.println(message.substring(13,message.length()));
+                        i=3;
+                    }else if (message.equals("user_not_found")) {
+                        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+                        System.out.println("L'utilisateur renseigne n'existe pas.");
+                        Thread.sleep(2000);
+                        String choix = choix();
+                        String action = afficherMenu(choix);
+                    }else{
                         System.out.println(message);
                     }
                 } catch (IOException | InterruptedException e) {
@@ -55,10 +63,15 @@ public class Client {
         String personneCo ="";
         while (ok) {
             if(i==0){
+                System.out.println("---------------------------------------------------------------");
+                System.out.println("                   BIENVENUE DANS LE CHAT                      ");
+                System.out.println("---------------------------------------------------------------");
+
                 System.out.println("Saisissez votre identifiant");
                 pseudo=stdIn.readLine(); //on écrit une ligne au clavier
                 socOut.println(pseudo);
                 i++;
+                Thread.sleep(50);
             }else{
                 if(i==1) {
                     String choix = choix();
@@ -68,28 +81,18 @@ public class Client {
                     }
 
                 } else { // cas où i ne vaut pas 1 ou 0 donc on veut forcément écrire
-                    line=stdIn.readLine(); //on écrit une ligne au clavier
+                    //System.out.println("moi : "); // à tester
+                    line = stdIn.readLine(); //on écrit une ligne au clavier
                     if (line.equals(".")) {
                         socOut.println("deconnexion");
                         System.exit(0);
                         ok = false;
                         break; // on break quand on écrit '.'
                     } else if (line.equals("Revenir au menu")) {
-                        i=1;
-                        System.out.println("on va retourner à 1= 1");
-                    } else {
+                        i = 1;
+                    }else{
                         socOut.println(line);
                     }
-
-                    //on envoie la ligne au serveur en fonction du choix de l'utilisateur
-                    /*if(!personne.equals("")) { // cas où l'user veut envoyer un message à une personne quelle soit co ou non
-                        socOut.println("personne non co : " + personne + " et le message est : " + line);
-                    } else if (!personneCo.equals("")) { // cas où l'utilisateur veut envoyer un message à un utilisateur connecté
-                        socOut.println("personne co : " + personneCo + " et le message est : " + line);
-                    } else { // on envoie un message à tout le monde
-                        socOut.println(line);
-                    }*/
-
                 }
             }
         }
@@ -98,26 +101,25 @@ public class Client {
         stdIn.close();
         echoSocket.close();
     }
-    public String choix() throws IOException{
+    public String choix() throws IOException, InterruptedException {
+        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
         System.out.println("Choisissez une action : ");
         System.out.println("1 : Parler à une personne");
-        System.out.println("2 : Parler à une personne connectée");
-        System.out.println("3 : Parler à tout le monde");
-        System.out.println("4 : Deconnexion");
+        System.out.println("2 : Parler à tout le monde");
+        System.out.println("3 : Deconnexion");
         System.out.println("--------------------------");
         String action = stdIn.readLine();
         return action;
     }
 
-    public String afficherListePersonnes() throws IOException {
+    public String afficherListePersonnes() throws IOException, InterruptedException {
         String retour = "";
         // on récupère la liste des personnes qui ont un compte
         socOut.println("Afficher listeClients");
         System.out.println("Voici la liste des utilisateurs");
-        System.out.println(socIn.readLine());
-
+        Thread.sleep(10);
         // On tape le pseudo de la personne à qui on veut parler
-        System.out.println("A qui voulez vous parler");
+        System.out.println("A qui voulez vous parler ?");
         String personneChoisie = stdIn.readLine();
 
         if(personneChoisie.equals("Revenir au menu")) {
@@ -125,27 +127,11 @@ public class Client {
         } else {
             // on charge la conversation avec l'utilisateur choisi
             socOut.println("Conversation" + personneChoisie);
+            //on peut parler
             socOut.println("1:"+personneChoisie);
         }
         return retour;
 
-    }
-
-    public String afficherListePersonnesConnectees() throws IOException, InterruptedException {
-        String retour = "";
-        socOut.println("Afficher clients connectes");
-        System.out.println("Voici la liste des utilisateurs connectés");
-        Thread.sleep(10);
-        // On tape le pseudo de la personne à qui on veut parler
-        System.out.println("A qui voulez vous parler");
-        String personneChoisie = stdIn.readLine();
-        if(personneChoisie.equals("Revenir au menu")) {
-            retour = "retour menu";
-        } else {
-            socOut.println("Conversation" + personneChoisie);
-            socOut.println("2:"+personneChoisie);
-        }
-        return retour;
     }
 
     // méthode d'affichage du menu, en cas de choix or des propositions on rappelle la fonction
@@ -156,12 +142,9 @@ public class Client {
                 retour = afficherListePersonnes();
                 break;
             case "2" :
-                retour = afficherListePersonnesConnectees();
-                break;
-            case "3" :
                 socOut.println("pour tous");
                 break;
-            case "4" :
+            case "3" :
                 socOut.println("deconnexion");
                 System.exit(0);
                 break;

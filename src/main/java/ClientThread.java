@@ -47,27 +47,17 @@ public class ClientThread
     		while (true) {
 				String line = socIn.readLine();
 				//pour sauter une ligne dans les listes d'utilisateur
-				String sautDeLigne=System.getProperty("line.separator");
 				if(line.equals("Afficher listeClients")) { // si le client a demandé à voir la liste des clients
 					String listeToPrint = "";
 					for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
 						if (!entry.getKey().getPseudo().equals(identifiant)) {
-							listeToPrint+=entry.getKey().getPseudo()+sautDeLigne;
-						}
-					}
-					socOut.println(listeToPrint);
-
-				} else if (line.equals("Afficher clients connectes")) { // si le client veut voir seulement les clients connectés
-					String listeToPrint = "";
-					if(!(listeClients.size() ==1)) {
-						for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
-							if (!entry.getKey().getPseudo().equals(identifiant) && entry.getKey().getEtat()) { // on teste si l'utilisateur est connecté
-								listeToPrint += entry.getKey().getPseudo() + sautDeLigne;
+							listeToPrint+="	-"+entry.getKey().getPseudo();
+							if(entry.getKey().getEtat()){
+								listeToPrint+=" (en ligne)\n";
+							}else{
+								listeToPrint+=" (hors ligne)\n";
 							}
-
 						}
-					}else{
-						listeToPrint="Aucune personne connectee.";
 					}
 					socOut.println(listeToPrint);
 				} else if(line.equals("deconnexion")) {
@@ -77,13 +67,22 @@ public class ClientThread
 				else if(line.length()>=2 && line.substring(0, 2).equals("1:") && !line.substring(2, line.length()).equals("Revenir au menu")) {
 					//le client a choisi quelqu'un a qui parler
 					interlocuteur = line.substring(2,line.length());
+					System.out.println("liste: " + listeClients );
+					if(!listeClients.containsValue(getUserByPseudo(interlocuteur,listeClients))){
+						System.out.println(getUserByPseudo(interlocuteur,listeClients));
+						socOut.println("user_not_found");
+					}
 				} else if(line.length()>=9 && line.substring(0, 9).equals("pour tous")) {
 					interlocuteur = "tous";
 				} else if(line.length()>=2 && line.substring(0, 2).equals("2:")) {
 					interlocuteur = line.substring(2,line.length());
 				} else if(line.length()>=12 && line.substring(0, 12).equals("Conversation")) {
 					String contact = line.substring(12,line.length());
-					socOut.println(afficherConversation(contact));
+					if(!listeClients.containsValue(getUserByPseudo(contact,listeClients))){
+						socOut.println("");
+					}else {
+						socOut.println(afficherConversation(contact));
+					}
 				}
 				else {
 					//DISCUSSION BASIQUE
@@ -106,7 +105,6 @@ public class ClientThread
 							}
 						}
 					}
-
 				}
 				//System.out.println(identifiant + " a dit " + line);
     		}

@@ -26,27 +26,14 @@ public class EchoServerMultiThreaded  {
 		System.out.println("Server ready...");
 		PrintStream socOut = null;
 		User user ;
-		/*
-		JSONParser jsonParser = new JSONParser();
-		try (FileReader reader = new FileReader("../../../historique.json")) {
-			Object obj = jsonParser.parse(reader);
-			jsonHistorique = (JSONArray) obj;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}*/
 
 		// Ouverture du JSON
 		JSONParser jsonParser = new JSONParser();
-
-
 		try (FileReader reader = new FileReader("../../../historique.json"))
 		{
-
 			//Read JSON file
 			Object obj = jsonParser.parse(reader);
 	 		jsonHistorique = (JSONArray) obj;
-
-
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -66,23 +53,28 @@ public class EchoServerMultiThreaded  {
 			User userPrec = getUserByPseudo(pseudo, listeClients);
 			// si le client se reconnecte (et donc existe deja dans la base, il n'est pas nouveau)
 			if (userPrec != null && listeClients.containsKey(userPrec)){
-				listeClients.replace(userPrec, clientSocket);
-				userPrec.setStatut(true);
+				if(userPrec.getEtat()) { // deux memes pseudos sont connectés
+					socOut = new PrintStream(clientSocket.getOutputStream());
+					socOut.println("\nerreur_pseudoErreur, ce pseudo est deja utilise par un utilisateur actuellement en ligne. Saisissez '.' et relancer le chat en choississant un autre identifiant.");
+				}else{
+					listeClients.replace(userPrec,clientSocket);
+					userPrec.setEtat(true);
+				}
 			}else{
 				user = new User(pseudo);
 				listeClients.put(user, clientSocket);
-				user.setStatut(true);
-			}
-			//initialisation du client
-			ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, listeGroupes, jsonHistorique);
+				user.setEtat(true);
+				//initialisation du client
+				ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, listeGroupes, jsonHistorique);
 
-
-			//informer le client des gens déjà connectés
-			for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
-				socOut = new PrintStream(entry.getValue().getOutputStream());
-				if(!entry.getKey().getPseudo().equals(pseudo) && entry.getKey().getEtat()) socOut.println(pseudo + " est connecte.");
+				//informer le client des gens déjà connectés
+				for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
+					socOut = new PrintStream(entry.getValue().getOutputStream());
+					if(!entry.getKey().getPseudo().equals(pseudo) && entry.getKey().getEtat()) socOut.println(pseudo + " est en ligne.");
+				}
+				ct.start();
 			}
-			ct.start();
+
 		}
         } catch (Exception e) {
             System.err.println("Error in EchoServer:" + e);
