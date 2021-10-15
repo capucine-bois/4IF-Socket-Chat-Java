@@ -82,9 +82,8 @@ public class ClientThread
 				} else if(line.length()>=2 && line.substring(0, 2).equals("2:")) {
 					interlocuteur = line.substring(2,line.length());
 				} else if(line.length()>=12 && line.substring(0, 12).equals("Conversation")) {
-					System.out.println("on veut essayer d'afficher la conv bon sang de bonsoir");
 					String contact = line.substring(12,line.length());
-					afficherConversation(contact);
+					socOut.println(afficherConversation(contact));
 				}
 				else {
 					//DISCUSSION BASIQUE
@@ -132,9 +131,7 @@ public class ClientThread
 		   elementsMessage.put("expediteur", identifiant);
 		   elementsMessage.put("destinataire", interlocuteur);
 		   elementsMessage.put("contenu", line);
-		   JSONObject messageActuel= new JSONObject();
-		   messageActuel.put("message",elementsMessage);
-		   jsonHistorique.add(messageActuel);
+		   jsonHistorique.add(elementsMessage);
 	   }
 
 	   public void parse() throws IOException {
@@ -143,16 +140,17 @@ public class ClientThread
 	   }
 
 
-	   public void afficherConversation(String contact) {
+	   public String afficherConversation(String contact) {
+			String listeHistorique ="";
 		   for (int i = 0, size = jsonHistorique.size(); i < size; i++) {
 			   JSONObject objectInArray = (JSONObject) jsonHistorique.get(i);
 			   String destinataire = (String) objectInArray.get("destinataire");
 			   String expediteur = (String) objectInArray.get("expediteur");
-			   System.out.println("le destinaraire est " + destinataire + " et l'expediteur est " + expediteur);
 			   if((contact.equals(destinataire) && identifiant.equals(expediteur)) || (contact.equals(expediteur) && identifiant.equals(destinataire))) {
-				   System.out.println(expediteur + " : " + objectInArray.get("contenu"));
+				   listeHistorique += expediteur + " : " + objectInArray.get("contenu") + "\n";
 			   }
 		   }
+		   return listeHistorique;
 	   }
 
   }

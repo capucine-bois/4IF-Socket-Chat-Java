@@ -43,13 +43,8 @@ public class EchoServerMultiThreaded  {
 		{
 
 			//Read JSON file
-				Object obj = jsonParser.parse(reader);
-				JSONArray historiqueToRead = (JSONArray) obj;
-
-				for (int i = 0, size = historiqueToRead.size(); i < size; i++) {
-					JSONObject objectInArray = (JSONObject) historiqueToRead.get(i);
-					jsonHistorique.add(objectInArray);
-				}
+			Object obj = jsonParser.parse(reader);
+	 		jsonHistorique = (JSONArray) obj;
 
 
 		} catch (FileNotFoundException e) {
