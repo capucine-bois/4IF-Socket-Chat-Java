@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import org.json.simple.*;
 
 public class EchoServerMultiThreaded  {
 
@@ -9,8 +10,10 @@ public class EchoServerMultiThreaded  {
         ServerSocket listenSocket;
         Map<User,Socket> listeClients = new HashMap<User,Socket>();
 		ArrayList<Groupe> listeGroupes =  new ArrayList<>();
-                
-  	if (args.length != 1) {
+		JSONArray jsonHistorique = new JSONArray();
+
+
+		   if (args.length != 1) {
           System.out.println("Usage: java EchoServer <EchoServer port>");
           System.exit(1);
   	}
@@ -26,7 +29,12 @@ public class EchoServerMultiThreaded  {
             socIn= new BufferedReader(
     			new InputStreamReader(clientSocket.getInputStream())); 
 			System.out.println("Connexion from:" + clientSocket.getInetAddress());
-
+			JSONObject objectUser = new JSONObject();
+			/*if json pas vide {
+				JSONObject objectListeMessages = new JSONObject();
+				remplir listeMessages
+				objectUser.put("listeMessages", objectListeMessages);
+			}*/
 			pseudo = socIn.readLine();
 			User userPrec = getUserByPseudo(pseudo, listeClients);
 			// si le client se reconnecte (et donc existe deja dans la base, il n'est pas nouveau)
@@ -39,7 +47,7 @@ public class EchoServerMultiThreaded  {
 				user.setStatut(true);
 			}
 			//initialisation du client
-			ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, listeGroupes);
+			ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, listeGroupes, jsonHistorique, objectUser);
 
 			//System.out.println(listeGroupes);
 

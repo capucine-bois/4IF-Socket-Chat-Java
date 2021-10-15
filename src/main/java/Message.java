@@ -4,13 +4,13 @@ import java.util.concurrent.atomic.AtomicLong;
 public class Message {
     private String contenu;
     private long id;
-    private User expediteur = new User();
-    private User destinataire = new User();
+    private String expediteur ;
+    private String destinataire ;
     private static AtomicLong count = new AtomicLong();
 
     public Message(){}
 
-    public Message(User expediteur, String content, User destinataire){
+    public Message(String expediteur, String content, String destinataire){
         this.expediteur = expediteur;
         this.destinataire = destinataire;
         this.contenu=content;

@@ -1,0 +1,9 @@
+[{"user":{"listeMessages":[
+  {"message":{"destinaire":"Arthur","expediteur":"Capucine","contenu":"SaMDRR salut "}},
+  {"message":{"destinaire":"Arthur","expediteur":"Capucine","contenu":"oklm et toi"}},{
+    "message":{"destinaire":"Arthur","expediteur":"Capucine","contenu":"same"}}],"name":"Capucine"}},
+
+ {"user":{"listeMessages":[
+   {"message":{"destinaire":"Capucine","expediteur":"Arthur","contenu":"Salut la boss"}},
+   {"message":{"destinaire":"Capucine","expediteur":"Arthur","contenu":"ca va ?"}},
+   {"message":{"destinaire":"Capucine","expediteur":"Arthur","contenu":"je me d�co"}}],"name":"Arthur"}}]
