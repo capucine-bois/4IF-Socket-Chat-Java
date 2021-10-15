@@ -12,10 +12,6 @@ public class ClientThread
 	private ArrayList<Groupe> listeGroupes = new ArrayList<>();
 	private ArrayList<Groupe> listeGroupesUser = new ArrayList<>();
 
-	public static final String ANSI_RED = "[31mRED";
-	public static final String ANSI_RESET = "[0m";
-
-
 	ClientThread(Socket s, String id, Map<User,Socket> liste, ArrayList<Groupe> listeGroupes) {
 		this.listeClients=liste;
         this.identifiant = id;
@@ -56,12 +52,17 @@ public class ClientThread
 					}
 					socOut.println(listeToPrint);
 
-				} else if (line.equals("Afficher clients connectés")) { // si le client veut voir seulement les clients connectés
+				} else if (line.equals("Afficher clients connectes")) { // si le client veut voir seulement les clients connectés
 					String listeToPrint = "";
-					for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
-						if (!entry.getKey().getPseudo().equals(identifiant) && entry.getKey().getEtat()) { // on teste si l'utilisateur est connecté
-							listeToPrint+=entry.getKey().getPseudo()+sautDeLigne;
+					if(!(listeClients.size() ==1)) {
+						for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
+							if (!entry.getKey().getPseudo().equals(identifiant) && entry.getKey().getEtat()) { // on teste si l'utilisateur est connecté
+								listeToPrint += entry.getKey().getPseudo() + sautDeLigne;
+							}
+
 						}
+					}else{
+						listeToPrint="Aucune personne connectee.";
 					}
 					socOut.println(listeToPrint);
 				} else if(line.equals("deconnexion")) {

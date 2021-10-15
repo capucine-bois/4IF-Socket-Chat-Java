@@ -33,6 +33,8 @@ public class EchoClient {
             System.err.println("Couldn't get I/O for "
                                + "the connection to:"+ args[0]);
             System.exit(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }

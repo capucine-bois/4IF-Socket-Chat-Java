@@ -23,7 +23,7 @@ public class Client {
         this.i = 0;
     }
 
-    public void init(boolean ok)  throws IOException{
+    public void init(boolean ok) throws IOException, InterruptedException {
         String line, pseudo, nomGroupe;
         final boolean running = ok;
         // création du thread
@@ -39,7 +39,7 @@ public class Client {
                     } else {
                         System.out.println(message);
                     }
-                } catch (IOException e) {
+                } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                     break;
                 }
@@ -125,12 +125,11 @@ public class Client {
 
     }
 
-    public String afficherListePersonnesConnectees() throws IOException {
+    public String afficherListePersonnesConnectees() throws IOException, InterruptedException {
         String retour = "";
-        socOut.println("Afficher clients connectés");
+        socOut.println("Afficher clients connectes");
         System.out.println("Voici la liste des utilisateurs connectés");
-        System.out.println(socIn.readLine());
-
+        Thread.sleep(10);
         // On tape le pseudo de la personne à qui on veut parler
         System.out.println("A qui voulez vous parler");
         String personneChoisie = stdIn.readLine();
@@ -143,7 +142,7 @@ public class Client {
     }
 
     // méthode d'affichage du menu, en cas de choix or des propositions on rappelle la fonction
-    public String afficherMenu(String choix) throws IOException {
+    public String afficherMenu(String choix) throws IOException, InterruptedException {
         String retour = "";
         switch(choix) {
             case "1" :
