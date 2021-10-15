@@ -12,7 +12,7 @@ public class EchoServerMultiThreaded  {
         ServerSocket listenSocket;
         Map<User,Socket> listeClients = new HashMap<User,Socket>();
 		ArrayList<Groupe> listeGroupes =  new ArrayList<>();
-	   JSONArray jsonHistorique = new JSONArray();
+	   	JSONArray jsonHistorique = new JSONArray();
 
 
 		   if (args.length != 1) {
@@ -26,23 +26,30 @@ public class EchoServerMultiThreaded  {
 		System.out.println("Server ready...");
 		PrintStream socOut = null;
 		User user ;
+		/*
+		JSONParser jsonParser = new JSONParser();
+		try (FileReader reader = new FileReader("../../../historique.json")) {
+			Object obj = jsonParser.parse(reader);
+			jsonHistorique = (JSONArray) obj;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}*/
 
 		// Ouverture du JSON
 		JSONParser jsonParser = new JSONParser();
 
+
 		try (FileReader reader = new FileReader("../../../historique.json"))
 		{
-			//Read JSON file
-			if(!(reader.read()==-1)) {
-				Object obj = jsonParser.parse(reader);
 
+			//Read JSON file
+				Object obj = jsonParser.parse(reader);
 				JSONArray historiqueToRead = (JSONArray) obj;
 
 				for (int i = 0, size = historiqueToRead.size(); i < size; i++) {
 					JSONObject objectInArray = (JSONObject) historiqueToRead.get(i);
 					jsonHistorique.add(objectInArray);
 				}
-			}
 
 
 		} catch (FileNotFoundException e) {
