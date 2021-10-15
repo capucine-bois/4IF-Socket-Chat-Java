@@ -2,6 +2,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import org.json.simple.*;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class EchoServerMultiThreaded  {
 
@@ -10,13 +12,13 @@ public class EchoServerMultiThreaded  {
         ServerSocket listenSocket;
         Map<User,Socket> listeClients = new HashMap<User,Socket>();
 		ArrayList<Groupe> listeGroupes =  new ArrayList<>();
-		JSONArray jsonHistorique = new JSONArray();
+	   JSONArray jsonHistorique = new JSONArray();
 
 
 		   if (args.length != 1) {
-          System.out.println("Usage: java EchoServer <EchoServer port>");
-          System.exit(1);
-  	}
+		  System.out.println("Usage: java EchoServer <EchoServer port>");
+		  System.exit(1);
+			}
 	try {
         BufferedReader socIn = null ;
 		listenSocket = new ServerSocket(Integer.parseInt(args[0])); //port
@@ -24,17 +26,41 @@ public class EchoServerMultiThreaded  {
 		System.out.println("Server ready...");
 		PrintStream socOut = null;
 		User user ;
+
+		// Ouverture du JSON
+		JSONParser jsonParser = new JSONParser();
+
+		try (FileReader reader = new FileReader("../../../historique.json"))
+		{
+			//Read JSON file
+			if(!(reader.read()==-1)) {
+				Object obj = jsonParser.parse(reader);
+
+				JSONArray historiqueToRead = (JSONArray) obj;
+
+
+				for (int i = 0, size = historiqueToRead.size(); i < size; i++) {
+					JSONObject objectInArray = (JSONObject) historiqueToRead.get(i);
+					jsonHistorique.add(objectInArray);
+				}
+			}
+
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+
+
 		while (true) {
 			Socket clientSocket = listenSocket.accept();
             socIn= new BufferedReader(
     			new InputStreamReader(clientSocket.getInputStream())); 
 			System.out.println("Connexion from:" + clientSocket.getInetAddress());
-			JSONObject objectUser = new JSONObject();
-			/*if json pas vide {
-				JSONObject objectListeMessages = new JSONObject();
-				remplir listeMessages
-				objectUser.put("listeMessages", objectListeMessages);
-			}*/
+
 			pseudo = socIn.readLine();
 			User userPrec = getUserByPseudo(pseudo, listeClients);
 			// si le client se reconnecte (et donc existe deja dans la base, il n'est pas nouveau)
@@ -47,9 +73,8 @@ public class EchoServerMultiThreaded  {
 				user.setStatut(true);
 			}
 			//initialisation du client
-			ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, listeGroupes, jsonHistorique, objectUser);
+			ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, listeGroupes, jsonHistorique);
 
-			//System.out.println(listeGroupes);
 
 			//informer le client des gens déjà connectés
 			for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
@@ -76,6 +101,7 @@ public class EchoServerMultiThreaded  {
 		  }
 		  return userPrec;
 	  }
+
   }
 
   

@@ -5,6 +5,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Scanner;
+import java.io.FileWriter;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 public class Client {
     private Socket echoSocket = null;
@@ -116,9 +119,12 @@ public class Client {
         // On tape le pseudo de la personne à qui on veut parler
         System.out.println("A qui voulez vous parler");
         String personneChoisie = stdIn.readLine();
+
         if(personneChoisie.equals("Revenir au menu")) {
             retour = "retour menu";
         } else {
+            // on charge la conversation avec l'utilisateur choisi
+            socOut.println("Conversation" + personneChoisie);
             socOut.println("1:"+personneChoisie);
         }
         return retour;
