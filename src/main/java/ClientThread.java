@@ -14,7 +14,6 @@ public class ClientThread
 	private ArrayList<Groupe> listeGroupesUser = new ArrayList<>();
 	private JSONArray jsonHistorique = new JSONArray();
 	private FileWriter file = new FileWriter("../../../historique.json");
-	private JSONArray arrayMessages = new JSONArray();
 
 	ClientThread(Socket s, String id, Map<User,Socket> liste, ArrayList<Groupe> listeGroupes, JSONArray jsonHistorique) throws IOException {
 		this.listeClients=liste;
@@ -83,6 +82,7 @@ public class ClientThread
 				} else if(line.length()>=2 && line.substring(0, 2).equals("2:")) {
 					interlocuteur = line.substring(2,line.length());
 				} else if(line.length()>=12 && line.substring(0, 12).equals("Conversation")) {
+					System.out.println("on veut essayer d'afficher la conv bon sang de bonsoir");
 					String contact = line.substring(12,line.length());
 					afficherConversation(contact);
 				}
@@ -148,6 +148,7 @@ public class ClientThread
 			   JSONObject objectInArray = (JSONObject) jsonHistorique.get(i);
 			   String destinataire = (String) objectInArray.get("destinataire");
 			   String expediteur = (String) objectInArray.get("expediteur");
+			   System.out.println("le destinaraire est " + destinataire + " et l'expediteur est " + expediteur);
 			   if((contact.equals(destinataire) && identifiant.equals(expediteur)) || (contact.equals(expediteur) && identifiant.equals(destinataire))) {
 				   System.out.println(expediteur + " : " + objectInArray.get("contenu"));
 			   }

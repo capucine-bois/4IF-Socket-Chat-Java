@@ -142,6 +142,8 @@ public class Client {
         if(personneChoisie.equals("Revenir au menu")) {
             retour = "retour menu";
         } else {
+            socOut.println("Conversation" + personneChoisie);
+            Thread.sleep(1000);
             socOut.println("2:"+personneChoisie);
         }
         return retour;

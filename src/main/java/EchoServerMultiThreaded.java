@@ -38,7 +38,6 @@ public class EchoServerMultiThreaded  {
 
 				JSONArray historiqueToRead = (JSONArray) obj;
 
-
 				for (int i = 0, size = historiqueToRead.size(); i < size; i++) {
 					JSONObject objectInArray = (JSONObject) historiqueToRead.get(i);
 					jsonHistorique.add(objectInArray);
@@ -81,12 +80,6 @@ public class EchoServerMultiThreaded  {
 				socOut = new PrintStream(entry.getValue().getOutputStream());
 				if(!entry.getKey().getPseudo().equals(pseudo) && entry.getKey().getEtat()) socOut.println(pseudo + " est connecte.");
 			}
-			/*
-			PrintStream socOutActuelle = new PrintStream(clientSocket.getOutputStream());
-			// Afficher la liste des personnes déjà connectés
-			for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
-				if(!entry.getKey().getPseudo().equals(pseudo) && entry.getKey().getEtat()) socOutActuelle.println(entry.getKey().getPseudo() + " est connecte.");
-			}*/
 			ct.start();
 		}
         } catch (Exception e) {
