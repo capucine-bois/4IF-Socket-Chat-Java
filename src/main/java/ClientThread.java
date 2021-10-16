@@ -51,18 +51,18 @@ public class ClientThread
                 String line = socIn.readLine();
                 //pour sauter une ligne dans les listes d'utilisateur
                 if (line.equals("Afficher listeClients")) { // si le client a demandé à voir la liste des clients
-                    String listeToPrint = "";
+                    StringBuilder listeToPrint = new StringBuilder();
                     for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
                         if (!entry.getKey().getPseudo().equals(identifiant)) {
-                            listeToPrint = listeToPrint + ("	-" + entry.getKey().getPseudo());
+                            listeToPrint.append("	-").append(entry.getKey().getPseudo());
                             if (entry.getKey().getEtat()) {
-                                listeToPrint += " (en ligne)\n";
+                                listeToPrint.append(" (en ligne)\n");
                             } else {
-                                listeToPrint += " (hors ligne)\n";
+                                listeToPrint.append(" (hors ligne)\n");
                             }
                         }
                     }
-                    socOut.println(listeToPrint);
+                    socOut.println("listToPrint"+listeToPrint);
                 } else if (line.equals("deconnexion")) {
                     userActuel.setEtat(false);
                 } else if (line.length() >= 2 && line.startsWith("1:") && !line.substring(2).equals("Revenir au menu")) {

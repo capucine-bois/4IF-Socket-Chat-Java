@@ -29,10 +29,11 @@ public class Client {
             while (true) {
                 try {
                     String message = socIn.readLine();
-                    // on passe dans le thread bizarre
-                     if (message.length()>=13 && message.startsWith("erreur_pseudo")){
+                    String erreurPseudo = "erreur_pseudo";
+                    String listUtilisateurs= "listToPrint";
+                     if (message.length()>=erreurPseudo.length() && message.startsWith(erreurPseudo)){
                         new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-                        System.out.println(message.substring(13));
+                        System.out.println(message.substring(erreurPseudo.length()));
                          try {
                              mutex.lock();
                              i=3;
@@ -40,13 +41,29 @@ public class Client {
                              mutex.unlock();
                          }
                     }else if (message.equals("user_not_found")) {
-                        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-                        System.out.println("L'utilisateur renseigne n'existe pas. Tapez sur Entree.");
+                         new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+                         System.out.println("L'utilisateur renseigne n'existe pas. Tapez sur Entree pour revenir au menu.");
                          try {
                              mutex.lock();
-                             i=1;
+                             i = 1;
                          } finally {
                              mutex.unlock();
+                         }
+                     }else if(message.startsWith(listUtilisateurs)){
+                         if(message.equals(listUtilisateurs)) {
+                             //cas ou aucun utilisateur n'existe dans le base et que la liste affichée lors de l'option 1 est donc vide
+                             System.out.println("Désolé, aucun autre utilisateur n'existe pour le moment !");
+                             try {
+                                 mutex.lock();
+                                 i = 1;
+                             } finally {
+                                 mutex.unlock();
+                             }
+                         }else {
+                             System.out.println("Voici la liste des utilisateurs : ");
+                             System.out.println(message.substring(listUtilisateurs.length()));
+                             Thread.sleep(50);
+                             System.out.println("\nA qui voulez vous parler ?");
                          }
                     }else{
                         System.out.println(message);
@@ -121,16 +138,15 @@ public class Client {
         return stdIn.readLine();
     }
 
-    public String afficherListePersonnes() throws IOException, InterruptedException {
-        String retour = "";
+    public void afficherListePersonnes() {
         // on récupère la liste des personnes qui ont un compte
         socOut.println("Afficher listeClients");
-        System.out.println("Voici la liste des utilisateurs");
+    }
+
+    public String choisirInterlocuteur() throws IOException {
+        String retour = "";
         // On tape le pseudo de la personne à qui on veut parler
-        System.out.println("A qui voulez vous parler ?");
         String personneChoisie = stdIn.readLine();
-
-
         if(personneChoisie.equals("Revenir au menu")) {
             retour = "retour menu";
         }
@@ -140,17 +156,16 @@ public class Client {
             //on peut parler
             socOut.println("1:"+personneChoisie);
         }
-
         return retour;
-
     }
 
     // méthode d'affichage du menu, en cas de choix or des propositions on rappelle la fonction
-    public String afficherMenu(String choix) throws IOException, InterruptedException {
+    public String afficherMenu(String choix) throws IOException{
         String retour = "";
         switch(choix) {
             case "1" :
-                retour = afficherListePersonnes();
+                afficherListePersonnes();
+                retour= choisirInterlocuteur();
                 break;
             case "2" :
                 socOut.println("pour tous");
