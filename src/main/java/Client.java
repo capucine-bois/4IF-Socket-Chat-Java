@@ -35,15 +35,12 @@ public class Client {
                 try {
                     String message = socIn.readLine();
                     // on passe dans le thread bizarre
-                    if (message.equals("Revenir au menu")) {
-                        String choix = choix();
-                        String action = afficherMenu(choix);
-                    } else if (message.length()>=13 && message.substring(0,13).equals("erreur_pseudo")){
-                        //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+                     if (message.length()>=13 && message.substring(0,13).equals("erreur_pseudo")){
+                        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
                         System.out.println(message.substring(13,message.length()));
                         i=3;
                     }else if (message.equals("user_not_found")) {
-                        //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+                        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
                         System.out.println("L'utilisateur renseigne n'existe pas.");
                         //Thread.sleep(2000);
                         i = 1;
@@ -91,8 +88,6 @@ public class Client {
                         break; // on break quand on écrit '.'
                     } else if (line.equals("Revenir au menu")) {
                         i = 1;
-                    } else if(line.equals("paul")) {
-                        i = 1;
                     } else {
                         socOut.println(line);
                     }
@@ -105,7 +100,7 @@ public class Client {
         echoSocket.close();
     }
     public String choix() throws IOException, InterruptedException {
-        //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
         System.out.println("Choisissez une action : ");
         System.out.println("1 : Parler à une personne");
         System.out.println("2 : Parler à tout le monde");

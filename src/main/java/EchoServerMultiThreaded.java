@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
@@ -14,6 +15,7 @@ public class EchoServerMultiThreaded {
         Map<User, Socket> listeClients = new HashMap<User, Socket>();
         ArrayList<Groupe> listeGroupes = new ArrayList<>();
         JSONArray jsonHistorique = new JSONArray();
+        ReentrantLock mutex = new ReentrantLock();
 
 
         if (args.length != 1) {
@@ -59,13 +61,16 @@ public class EchoServerMultiThreaded {
                     } else {
                         listeClients.replace(userPrec, clientSocket);
                         userPrec.setEtat(true);
+                        //initialisation du client
+                        ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, listeGroupes, jsonHistorique,mutex);
+                        ct.start();
                     }
                 } else {
                     user = new User(pseudo);
                     listeClients.put(user, clientSocket);
                     user.setEtat(true);
                     //initialisation du client
-                    ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, listeGroupes, jsonHistorique);
+                    ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, listeGroupes, jsonHistorique,mutex);
 
                     //informer le client des gens déjà connectés
                     for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
