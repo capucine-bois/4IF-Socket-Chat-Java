@@ -67,9 +67,7 @@ public class ClientThread
 				else if(line.length()>=2 && line.substring(0, 2).equals("1:") && !line.substring(2, line.length()).equals("Revenir au menu")) {
 					//le client a choisi quelqu'un a qui parler
 					interlocuteur = line.substring(2,line.length());
-					System.out.println("liste: " + listeClients );
-					if(!listeClients.containsValue(getUserByPseudo(interlocuteur,listeClients))){
-						System.out.println(getUserByPseudo(interlocuteur,listeClients));
+					if(!listeClients.containsKey(getUserByPseudo(interlocuteur,listeClients))){
 						socOut.println("user_not_found");
 					}
 				} else if(line.length()>=9 && line.substring(0, 9).equals("pour tous")) {

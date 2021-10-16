@@ -34,19 +34,19 @@ public class Client {
             while (running) {
                 try {
                     String message = socIn.readLine();
+                    // on passe dans le thread bizarre
                     if (message.equals("Revenir au menu")) {
                         String choix = choix();
                         String action = afficherMenu(choix);
                     } else if (message.length()>=13 && message.substring(0,13).equals("erreur_pseudo")){
-                        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+                        //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
                         System.out.println(message.substring(13,message.length()));
                         i=3;
                     }else if (message.equals("user_not_found")) {
-                        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+                        //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
                         System.out.println("L'utilisateur renseigne n'existe pas.");
-                        Thread.sleep(2000);
-                        String choix = choix();
-                        String action = afficherMenu(choix);
+                        //Thread.sleep(2000);
+                        i = 1;
                     }else{
                         System.out.println(message);
                     }
@@ -73,11 +73,12 @@ public class Client {
                 i++;
                 Thread.sleep(50);
             }else{
+                Thread.sleep(1000);
                 if(i==1) {
                     String choix = choix();
                     String action = afficherMenu(choix);
                     if (!action.equals("retour menu")) {
-                        i++;
+                        i=3;
                     }
 
                 } else { // cas où i ne vaut pas 1 ou 0 donc on veut forcément écrire
@@ -90,7 +91,9 @@ public class Client {
                         break; // on break quand on écrit '.'
                     } else if (line.equals("Revenir au menu")) {
                         i = 1;
-                    }else{
+                    } else if(line.equals("paul")) {
+                        i = 1;
+                    } else {
                         socOut.println(line);
                     }
                 }
@@ -102,7 +105,7 @@ public class Client {
         echoSocket.close();
     }
     public String choix() throws IOException, InterruptedException {
-        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+        //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
         System.out.println("Choisissez une action : ");
         System.out.println("1 : Parler à une personne");
         System.out.println("2 : Parler à tout le monde");
@@ -122,14 +125,17 @@ public class Client {
         System.out.println("A qui voulez vous parler ?");
         String personneChoisie = stdIn.readLine();
 
+
         if(personneChoisie.equals("Revenir au menu")) {
             retour = "retour menu";
-        } else {
+        }
+        else {
             // on charge la conversation avec l'utilisateur choisi
             socOut.println("Conversation" + personneChoisie);
             //on peut parler
             socOut.println("1:"+personneChoisie);
         }
+
         return retour;
 
     }
