@@ -3,20 +3,16 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.Scanner;
-import java.io.FileWriter;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Client {
-    private Socket echoSocket = null;
-    private PrintStream socOut = null;
-    private BufferedReader stdIn = null;
-    private BufferedReader socIn = null;
+    private Socket echoSocket ;
+    private PrintStream socOut;
+    private BufferedReader stdIn;
+    private BufferedReader socIn;
     private ArrayList<String> listePseudoUsersCo = new ArrayList<>();
-
-    int i;
+    private ReentrantLock mutex = new ReentrantLock();
+    private int i;
 
     Client(Socket echoS, PrintStream out, BufferedReader stdin, BufferedReader in) throws IOException {
         this.echoSocket= echoS;
@@ -26,24 +22,32 @@ public class Client {
         this.i = 0;
     }
 
-    public void init(boolean ok) throws IOException, InterruptedException {
+    public void init() throws IOException, InterruptedException {
         String line, pseudo, nomGroupe;
-        final boolean running = ok;
         // création du thread
         Thread t = new Thread(() -> {
-            while (running) {
+            while (true) {
                 try {
                     String message = socIn.readLine();
                     // on passe dans le thread bizarre
-                     if (message.length()>=13 && message.substring(0,13).equals("erreur_pseudo")){
+                     if (message.length()>=13 && message.startsWith("erreur_pseudo")){
                         new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-                        System.out.println(message.substring(13,message.length()));
-                        i=3;
+                        System.out.println(message.substring(13));
+                         try {
+                             mutex.lock();
+                             i=3;
+                         } finally {
+                             mutex.unlock();
+                         }
                     }else if (message.equals("user_not_found")) {
                         new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-                        System.out.println("L'utilisateur renseigne n'existe pas.");
-                        //Thread.sleep(2000);
-                        i = 1;
+                        System.out.println("L'utilisateur renseigne n'existe pas. Tapez sur Entree.");
+                         try {
+                             mutex.lock();
+                             i=1;
+                         } finally {
+                             mutex.unlock();
+                         }
                     }else{
                         System.out.println(message);
                     }
@@ -58,7 +62,7 @@ public class Client {
 
         String personne = "";
         String personneCo ="";
-        while (ok) {
+        while (true) {
             if(i==0){
                 System.out.println("---------------------------------------------------------------");
                 System.out.println("                   BIENVENUE DANS LE CHAT                      ");
@@ -67,37 +71,45 @@ public class Client {
                 System.out.println("Saisissez votre identifiant");
                 pseudo=stdIn.readLine(); //on écrit une ligne au clavier
                 socOut.println(pseudo);
-                i++;
-                Thread.sleep(50);
+                try {
+                    mutex.lock();
+                    i++;
+                } finally {
+                    mutex.unlock();
+                }
             }else{
-                Thread.sleep(1000);
                 if(i==1) {
                     String choix = choix();
                     String action = afficherMenu(choix);
                     if (!action.equals("retour menu")) {
-                        i=3;
+                        try {
+                            mutex.lock();
+                            i=2;
+                        } finally {
+                            mutex.unlock();
+                        }
                     }
 
                 } else { // cas où i ne vaut pas 1 ou 0 donc on veut forcément écrire
-                    //System.out.println("moi : "); // à tester
                     line = stdIn.readLine(); //on écrit une ligne au clavier
                     if (line.equals(".")) {
                         socOut.println("deconnexion");
+                        closeSession();
                         System.exit(0);
-                        ok = false;
-                        break; // on break quand on écrit '.'
                     } else if (line.equals("Revenir au menu")) {
-                        i = 1;
+                        try {
+                            mutex.lock();
+                            i=1;
+                        } finally {
+                            mutex.unlock();
+                        }
                     } else {
                         socOut.println(line);
                     }
                 }
             }
         }
-        socOut.close();
-        socIn.close();
-        stdIn.close();
-        echoSocket.close();
+
     }
     public String choix() throws IOException, InterruptedException {
         new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
@@ -106,8 +118,7 @@ public class Client {
         System.out.println("2 : Parler à tout le monde");
         System.out.println("3 : Deconnexion");
         System.out.println("--------------------------");
-        String action = stdIn.readLine();
-        return action;
+        return stdIn.readLine();
     }
 
     public String afficherListePersonnes() throws IOException, InterruptedException {
@@ -115,7 +126,6 @@ public class Client {
         // on récupère la liste des personnes qui ont un compte
         socOut.println("Afficher listeClients");
         System.out.println("Voici la liste des utilisateurs");
-        Thread.sleep(10);
         // On tape le pseudo de la personne à qui on veut parler
         System.out.println("A qui voulez vous parler ?");
         String personneChoisie = stdIn.readLine();
@@ -146,9 +156,12 @@ public class Client {
                 socOut.println("pour tous");
                 break;
             case "3" :
+            case "." :
                 socOut.println("deconnexion");
+                closeSession();
                 System.exit(0);
                 break;
+
             default :
                 retour = "retour menu";
                 break;
@@ -156,4 +169,10 @@ public class Client {
         return retour;
     }
 
+    public void closeSession() throws IOException {
+        socOut.close();
+        socIn.close();
+        stdIn.close();
+        echoSocket.close();
+    }
 }

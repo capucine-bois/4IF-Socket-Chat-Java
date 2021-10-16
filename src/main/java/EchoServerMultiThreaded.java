@@ -10,9 +10,9 @@ import org.json.simple.parser.ParseException;
 public class EchoServerMultiThreaded {
 
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         ServerSocket listenSocket;
-        Map<User, Socket> listeClients = new HashMap<User, Socket>();
+        Map<User, Socket> listeClients = new HashMap<>();
         ArrayList<Groupe> listeGroupes = new ArrayList<>();
         JSONArray jsonHistorique = new JSONArray();
         ReentrantLock mutex = new ReentrantLock();
@@ -23,24 +23,20 @@ public class EchoServerMultiThreaded {
             System.exit(1);
         }
         try {
-            BufferedReader socIn = null;
+            BufferedReader socIn;
             listenSocket = new ServerSocket(Integer.parseInt(args[0])); //port
-            String pseudo = "";
+            String pseudo ;
             System.out.println("Server ready...");
-            PrintStream socOut = null;
+            PrintStream socOut;
             User user;
 
             // Ouverture du JSON
             JSONParser jsonParser = new JSONParser();
-            try (FileReader reader = new FileReader("../../../historique.json")) {
+            try (FileReader reader = new FileReader("./historique.json")) {
                 //Read JSON file
                 Object obj = jsonParser.parse(reader);
                 jsonHistorique = (JSONArray) obj;
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ParseException e) {
                 e.printStackTrace();
             }
 
@@ -50,7 +46,6 @@ public class EchoServerMultiThreaded {
                 socIn = new BufferedReader(
                         new InputStreamReader(clientSocket.getInputStream()));
                 System.out.println("Connexion from:" + clientSocket.getInetAddress());
-
                 pseudo = socIn.readLine();
                 User userPrec = getUserByPseudo(pseudo, listeClients);
                 // si le client se reconnecte (et donc existe deja dans la base, il n'est pas nouveau)

@@ -8,7 +8,7 @@ public class EchoClient {
   *  main method
   *  accepts a connection, receives a message from client then sends an echo to the client
   **/
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args){
 
         if (args.length != 2) {
           System.out.println("Usage: java EchoClient <EchoServer host> <EchoServer port>");
@@ -16,15 +16,14 @@ public class EchoClient {
         }
 
         try {
-            Socket echoSocket = new Socket(args[0],new Integer(args[1]).intValue()); // on crée le socket avec l'hote et le port
+            Socket echoSocket = new Socket(args[0],Integer.parseInt(args[1])); // on crée le socket avec l'hote et le port
             BufferedReader socIn = new BufferedReader(
                 new InputStreamReader(echoSocket.getInputStream()));   // socIn = ce qui vient du serveur 
             PrintStream socOut= new PrintStream(echoSocket.getOutputStream()); //socOut = ce qui va vers le serveur
             BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in)); //pour la lecture clavier
             //création client
             Client client = new Client(echoSocket,socOut, stdIn, socIn);
-            boolean enCours = true;
-            client.init(enCours);
+            client.init();
 
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host:" + args[0]);

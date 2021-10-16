@@ -14,19 +14,19 @@ public class ClientThread
     private Map<User, Socket> listeClients;
     private ArrayList<Groupe> listeGroupes = new ArrayList<>();
     private ArrayList<Groupe> listeGroupesUser = new ArrayList<>();
-    private JSONArray jsonHistorique = new JSONArray();
+    private JSONArray jsonHistorique ;
     private ReentrantLock mutex;
 
-    ClientThread(Socket s, String id, Map<User, Socket> liste, ArrayList<Groupe> listeGroupes, JSONArray jsonHistorique, ReentrantLock mutex) throws IOException {
+    ClientThread(Socket s, String id, Map<User, Socket> liste, ArrayList<Groupe> listeGroupes, JSONArray jsonHistorique, ReentrantLock mutex){
         this.listeClients = liste;
         this.identifiant = id;
         this.clientSocket = s;
         this.mutex = mutex;
         if (listeGroupes != null) {
             this.listeGroupes = listeGroupes;
-            for (int i = 0; i < listeGroupes.size(); i++) {
-                if (listeGroupes.get(i).isUserInThisGroup(getUserByPseudo(identifiant, listeClients))) {
-                    this.listeGroupesUser.add(listeGroupes.get(i));
+            for (Groupe groupe : listeGroupes) {
+                if (groupe.isUserInThisGroup(getUserByPseudo(identifiant, listeClients))) {
+                    this.listeGroupesUser.add(groupe);
                 }
             }
         }
@@ -41,9 +41,9 @@ public class ClientThread
     public void run() {
         try {
 
-            BufferedReader socIn = null;
+            BufferedReader socIn ;
             socIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            PrintStream socOutClients = null;
+            PrintStream socOutClients ;
             PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
             User userActuel = getUserByPseudo(identifiant, listeClients);
             String interlocuteur = "";
@@ -54,7 +54,7 @@ public class ClientThread
                     String listeToPrint = "";
                     for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
                         if (!entry.getKey().getPseudo().equals(identifiant)) {
-                            listeToPrint += "	-" + entry.getKey().getPseudo();
+                            listeToPrint = listeToPrint + ("	-" + entry.getKey().getPseudo());
                             if (entry.getKey().getEtat()) {
                                 listeToPrint += " (en ligne)\n";
                             } else {
@@ -65,20 +65,20 @@ public class ClientThread
                     socOut.println(listeToPrint);
                 } else if (line.equals("deconnexion")) {
                     userActuel.setEtat(false);
-                } else if (line.length() >= 2 && line.substring(0, 2).equals("1:") && !line.substring(2, line.length()).equals("Revenir au menu")) {
+                } else if (line.length() >= 2 && line.startsWith("1:") && !line.substring(2).equals("Revenir au menu")) {
                     //le client a choisi quelqu'un a qui parler
-                    interlocuteur = line.substring(2, line.length());
+                    interlocuteur = line.substring(2);
                     if (!listeClients.containsKey(getUserByPseudo(interlocuteur, listeClients))) {
                         socOut.println("user_not_found");
                     }
-                } else if (line.length() >= 9 && line.substring(0, 9).equals("pour tous")) {
+                } else if (line.length() >= 9 && line.startsWith("pour tous")) {
                     interlocuteur = "tous";
-                } else if (line.length() >= 2 && line.substring(0, 2).equals("2:")) {
-                    interlocuteur = line.substring(2, line.length());
-                } else if (line.length() >= 12 && line.substring(0, 12).equals("Conversation")) {
-                    String contact = line.substring(12, line.length());
+                } else if (line.length() >= 2 && line.startsWith("2:")) {
+                    interlocuteur = line.substring(2);
+                } else if (line.length() >= 12 && line.startsWith("Conversation")) {
+                    String contact = line.substring(12);
                     if (!listeClients.containsKey(getUserByPseudo(contact, listeClients))) {
-                        socOut.println("");
+                        socOut.println();
                     } else {
                         try {
                             mutex.lock();
@@ -105,7 +105,7 @@ public class ClientThread
                                 break;
                             }
                         }
-                    } else if (interlocuteur.equals("tous")) {
+                    } else {
                         for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
                             if (!entry.getKey().getPseudo().equals(identifiant)) {
                                 socOutClients = new PrintStream(entry.getValue().getOutputStream());
@@ -133,7 +133,7 @@ public class ClientThread
         return userPrec;
     }
 
-    public void fillJson(String interlocuteur, String line) throws IOException {
+    public void fillJson(String interlocuteur, String line) {
         JSONObject elementsMessage = new JSONObject();
         elementsMessage.put("expediteur", identifiant);
         elementsMessage.put("destinataire", interlocuteur);
@@ -142,7 +142,7 @@ public class ClientThread
     }
 
     public void parse() {
-        try (FileWriter file = new FileWriter("../../../historique.json")) {
+        try (FileWriter file = new FileWriter("./historique.json")) {
             file.write(jsonHistorique.toJSONString());
             file.flush();
         } catch (IOException e) {
@@ -153,16 +153,16 @@ public class ClientThread
 
 
     public String afficherConversation(String contact) {
-        String listeHistorique = "";
-        for (int i = 0, size = jsonHistorique.size(); i < size; i++) {
-            JSONObject objectInArray = (JSONObject) jsonHistorique.get(i);
+        StringBuilder listeHistorique = new StringBuilder();
+        for (Object element : jsonHistorique) {
+            JSONObject objectInArray = (JSONObject) element;
             String destinataire = (String) objectInArray.get("destinataire");
             String expediteur = (String) objectInArray.get("expediteur");
             if ((contact.equals(destinataire) && identifiant.equals(expediteur)) || (contact.equals(expediteur) && identifiant.equals(destinataire))) {
-                listeHistorique += expediteur + " : " + objectInArray.get("contenu") + "\n";
+                listeHistorique.append(expediteur).append(" : ").append(objectInArray.get("contenu")).append("\n");
             }
         }
-        return listeHistorique;
+        return listeHistorique.toString();
     }
 
 }
