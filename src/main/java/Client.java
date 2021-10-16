@@ -31,40 +31,37 @@ public class Client {
                     String message = socIn.readLine();
                     String erreurPseudo = "erreur_pseudo";
                     String listUtilisateurs= "listToPrint";
-                     if (message.length()>=erreurPseudo.length() && message.startsWith(erreurPseudo)){
+                    if (message.length()>=erreurPseudo.length() && message.startsWith(erreurPseudo)){
                         new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
                         System.out.println(message.substring(erreurPseudo.length()));
-                         try {
-                             mutex.lock();
-                             i=3;
-                         } finally {
-                             mutex.unlock();
-                         }
+                        try {
+                            mutex.lock();
+                            i=3;
+                        } finally {
+                            mutex.unlock();
+                        }
                     }else if (message.equals("user_not_found")) {
-                         new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-                         System.out.println("L'utilisateur renseigne n'existe pas. Tapez sur Entree pour revenir au menu.");
-                         try {
-                             mutex.lock();
-                             i = 1;
-                         } finally {
-                             mutex.unlock();
-                         }
-                     }else if(message.startsWith(listUtilisateurs)){
-                         if(message.equals(listUtilisateurs)) {
-                             //cas ou aucun utilisateur n'existe dans le base et que la liste affichée lors de l'option 1 est donc vide
-                             System.out.println("Désolé, aucun autre utilisateur n'existe pour le moment !");
-                             try {
-                                 mutex.lock();
-                                 i = 1;
-                             } finally {
-                                 mutex.unlock();
-                             }
-                         }else {
-                             System.out.println("Voici la liste des utilisateurs : ");
-                             System.out.println(message.substring(listUtilisateurs.length()));
-                             Thread.sleep(50);
-                             System.out.println("\nA qui voulez vous parler ?");
-                         }
+                        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+                        System.out.println("L'utilisateur renseigne n'existe pas. Tapez sur Entree pour revenir au menu.");
+                        try {
+                            mutex.lock();
+                            i = 1;
+                        } finally {
+                            mutex.unlock();
+                        }
+                    }else if(message.startsWith(listUtilisateurs)){
+                        if(message.equals(listUtilisateurs)) {
+                            //cas ou aucun utilisateur n'existe dans le base et que la liste affichée lors de l'option 1 est donc vide
+                            System.out.println("Désolé, aucun autre utilisateur n'existe pour le moment !");
+                            try {
+                                mutex.lock();
+                                i = 1;
+                            } finally {
+                                mutex.unlock();
+                            }
+                        }else {
+                            System.out.println("Voici la liste des utilisateurs : \n"+message.substring(listUtilisateurs.length()) + "\nA qui voulez vous parler ?");
+                        }
                     }else{
                         System.out.println(message);
                     }

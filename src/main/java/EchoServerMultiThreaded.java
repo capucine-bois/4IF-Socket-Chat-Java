@@ -18,13 +18,9 @@ public class EchoServerMultiThreaded {
         ReentrantLock mutex = new ReentrantLock();
 
 
-        if (args.length != 1) {
-            System.out.println("Usage: java EchoServer <EchoServer port>");
-            System.exit(1);
-        }
         try {
             BufferedReader socIn;
-            listenSocket = new ServerSocket(Integer.parseInt(args[0])); //port
+            listenSocket = new ServerSocket(1234); //port
             String pseudo ;
             System.out.println("Server ready...");
             PrintStream socOut;
@@ -36,6 +32,14 @@ public class EchoServerMultiThreaded {
                 //Read JSON file
                 Object obj = jsonParser.parse(reader);
                 jsonHistorique = (JSONArray) obj;
+                 /*String pseudoToAdd;
+                for(Object objet : jsonHistorique){
+                    JSONObject objetJson = (JSONObject) objet;
+                    pseudoToAdd = (String) objetJson.get("expediteur");
+                    if(!alreadyContainsPseudo()){
+                        listeClients.put()
+                    }
+                }*/
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
@@ -67,12 +71,13 @@ public class EchoServerMultiThreaded {
                     //initialisation du client
                     ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, listeGroupes, jsonHistorique,mutex);
 
-                    //informer le client des gens déjà connectés
-                    for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
+                    //informer le client des gens déjà connectés -> vraiment utile...?
+                    /*for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
                         socOut = new PrintStream(entry.getValue().getOutputStream());
                         if (!entry.getKey().getPseudo().equals(pseudo) && entry.getKey().getEtat())
                             socOut.println(pseudo + " est en ligne.");
-                    }
+                    }*/
+
                     ct.start();
                 }
 
