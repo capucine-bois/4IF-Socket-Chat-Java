@@ -2,20 +2,18 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 public class EchoServerMultiThreaded {
-
 
     public static void main(String[] args) {
         ServerSocket listenSocket;
         Map<User, Socket> listeClients = new HashMap<>();
-        ArrayList<Groupe> listeGroupes = new ArrayList<>();
         JSONArray jsonHistorique = new JSONArray();
+        JSONArray listeUsersPersistant = new JSONArray();
         ReentrantLock mutex = new ReentrantLock();
+        ReentrantLock mutexUser = new ReentrantLock();
 
 
         try {
@@ -26,24 +24,29 @@ public class EchoServerMultiThreaded {
             PrintStream socOut;
             User user;
 
-            // Ouverture du JSON
+            // Ouverture du JSON HISTORIQUE DES MESSAGES
             JSONParser jsonParser = new JSONParser();
             try (FileReader reader = new FileReader("./historique.json")) {
                 //Read JSON file
                 Object obj = jsonParser.parse(reader);
                 jsonHistorique = (JSONArray) obj;
-                 /*String pseudoToAdd;
-                for(Object objet : jsonHistorique){
-                    JSONObject objetJson = (JSONObject) objet;
-                    pseudoToAdd = (String) objetJson.get("expediteur");
-                    if(!alreadyContainsPseudo()){
-                        listeClients.put()
-                    }
-                }*/
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
 
+            // Ouverture du JSON USERS
+            try (FileReader reader = new FileReader("./users.json")) {
+                //Read JSON file
+                Object obj = jsonParser.parse(reader);
+                listeUsersPersistant = (JSONArray) obj;
+                for (Object element : listeUsersPersistant) {
+                    JSONObject objectInArray = (JSONObject) element;
+                    String pseudoUser = (String) objectInArray.get("pseudo");
+                    listeClients.put(new User(pseudoUser),new Socket());
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
 
             while (true) {
                 Socket clientSocket = listenSocket.accept();
@@ -61,23 +64,24 @@ public class EchoServerMultiThreaded {
                         listeClients.replace(userPrec, clientSocket);
                         userPrec.setEtat(true);
                         //initialisation du client
-                        ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, listeGroupes, jsonHistorique,mutex);
+                        ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients,jsonHistorique,mutex);
                         ct.start();
                     }
                 } else {
                     user = new User(pseudo);
                     listeClients.put(user, clientSocket);
                     user.setEtat(true);
-                    //initialisation du client
-                    ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, listeGroupes, jsonHistorique,mutex);
-
-                    //informer le client des gens déjà connectés -> vraiment utile...?
-                    /*for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
-                        socOut = new PrintStream(entry.getValue().getOutputStream());
-                        if (!entry.getKey().getPseudo().equals(pseudo) && entry.getKey().getEtat())
-                            socOut.println(pseudo + " est en ligne.");
-                    }*/
-
+                    //remplir la liste persistante des users
+                    try {
+                        mutexUser.lock();
+                        JSONObject userObject = new JSONObject();
+                        userObject.put("pseudo", pseudo);
+                        listeUsersPersistant.add(userObject);
+                        parse(listeUsersPersistant); //Exporter le fichier JSON
+                    } finally {
+                        mutexUser.unlock();
+                    }
+                    ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, jsonHistorique,mutex);
                     ct.start();
                 }
 
@@ -95,6 +99,14 @@ public class EchoServerMultiThreaded {
         return userPrec;
     }
 
+    public static void parse(JSONArray listeUsersPeristant){
+        try (FileWriter file = new FileWriter("./users.json")) {
+            file.write(listeUsersPeristant.toJSONString());
+            file.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
 
   

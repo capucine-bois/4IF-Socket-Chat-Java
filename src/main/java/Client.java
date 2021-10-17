@@ -23,7 +23,7 @@ public class Client {
     }
 
     public void init() throws IOException, InterruptedException {
-        String line, pseudo, nomGroupe;
+        String line, pseudo;
         // création du thread
         Thread t = new Thread(() -> {
             while (true) {
@@ -50,17 +50,11 @@ public class Client {
                             mutex.unlock();
                         }
                     }else if(message.startsWith(listUtilisateurs)){
-                        if(message.equals(listUtilisateurs)) {
+                        if(message.equals(listUtilisateurs+"A qui voulez-vous parler?")) {
                             //cas ou aucun utilisateur n'existe dans le base et que la liste affichée lors de l'option 1 est donc vide
-                            System.out.println("Désolé, aucun autre utilisateur n'existe pour le moment !");
-                            try {
-                                mutex.lock();
-                                i = 1;
-                            } finally {
-                                mutex.unlock();
-                            }
+                            System.out.println("Désolé, aucun autre utilisateur n'existe pour le moment ! Tapez deux fois Entree pour revenir au Menu.");
                         }else {
-                            System.out.println("Voici la liste des utilisateurs : \n"+message.substring(listUtilisateurs.length()) + "\nA qui voulez vous parler ?");
+                            System.out.println("Voici la liste des utilisateurs : \n" +message.substring(11));
                         }
                     }else{
                         System.out.println(message);
@@ -78,9 +72,9 @@ public class Client {
         String personneCo ="";
         while (true) {
             if(i==0){
-                System.out.println("---------------------------------------------------------------");
-                System.out.println("                   BIENVENUE DANS LE CHAT                      ");
-                System.out.println("---------------------------------------------------------------");
+                System.out.println("\u001B[33m---------------------------------------------------------------");
+                System.out.println("\u001B[33m                   BIENVENUE DANS LE CHAT                      ");
+                System.out.println("\u001B[33m---------------------------------------------------------------");
 
                 System.out.println("Saisissez votre identifiant");
                 pseudo=stdIn.readLine(); //on écrit une ligne au clavier
@@ -141,9 +135,9 @@ public class Client {
     }
 
     public String choisirInterlocuteur() throws IOException {
+        String personneChoisie = stdIn.readLine();
         String retour = "";
         // On tape le pseudo de la personne à qui on veut parler
-        String personneChoisie = stdIn.readLine();
         if(personneChoisie.equals("Revenir au menu")) {
             retour = "retour menu";
         }
@@ -162,7 +156,7 @@ public class Client {
         switch(choix) {
             case "1" :
                 afficherListePersonnes();
-                retour= choisirInterlocuteur();
+                retour = choisirInterlocuteur();
                 break;
             case "2" :
                 socOut.println("pour tous");

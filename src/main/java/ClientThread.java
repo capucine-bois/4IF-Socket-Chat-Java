@@ -1,10 +1,8 @@
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.sun.media.jfxmedia.events.PlayerTimeListener;
 import org.json.simple.*;
 
 public class ClientThread
@@ -13,10 +11,10 @@ public class ClientThread
     private Socket clientSocket;
     private String pseudo;
     private Map<User, Socket> listeClients;
-    private JSONArray jsonHistorique ;
+    private JSONArray jsonHistorique;
     private ReentrantLock mutex;
 
-    ClientThread(Socket s, String pseudo, Map<User, Socket> liste, ArrayList<Groupe> listeGroupes, JSONArray jsonHistorique, ReentrantLock mutex){
+    ClientThread(Socket s, String pseudo, Map<User, Socket> liste, JSONArray jsonHistorique, ReentrantLock mutex){
         this.listeClients = liste;
         this.pseudo = pseudo;
         this.clientSocket = s;
@@ -45,7 +43,7 @@ public class ClientThread
                 } else if (line.length() >= 2 && line.startsWith("1:") && !line.substring(2).equals("Revenir au menu"))
                 {
                     interlocuteur = line.substring(2);
-                    callChoixInterlocuteur(interlocuteur, line, socOut);
+                    callChoixInterlocuteur(line, socOut);
                 } else if (line.length() >= 9 && line.startsWith("pour tous"))
                 {
                     interlocuteur = "tous";
@@ -118,6 +116,7 @@ public class ClientThread
 
     public void callAfficherListeClients(PrintStream socOut){
         StringBuilder listeToPrint = new StringBuilder();
+
         for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
             if (!entry.getKey().getPseudo().equals(pseudo)) {
                 listeToPrint.append("	-").append(entry.getKey().getPseudo());
@@ -128,13 +127,13 @@ public class ClientThread
                 }
             }
         }
-        socOut.println("listToPrint"+listeToPrint);
+        socOut.println("listToPrint"+listeToPrint+"A qui voulez-vous parler?");
     }
 
 
-    public void callChoixInterlocuteur(String interlocuteur, String line, PrintStream socOut){
+    public void callChoixInterlocuteur(String line, PrintStream socOut){
         //le client a choisi quelqu'un a qui parler
-        interlocuteur = line.substring(2);
+        String interlocuteur = line.substring(2);
         if (!listeClients.containsKey(getUserByPseudo(interlocuteur, listeClients))) {
             socOut.println("user_not_found");
         }
@@ -167,12 +166,9 @@ public class ClientThread
 
 
     public void callParlerAQuelquun(String line, String interlocuteur) throws IOException {
-        System.out.println("hhheere" + interlocuteur);
         for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
             if (entry.getKey().getPseudo().equals(interlocuteur)) {
-                System.out.println("ici interlocuteur = " + interlocuteur);
                 PrintStream socOutClients = new PrintStream(entry.getValue().getOutputStream());
-                System.out.println(socOutClients);
                 socOutClients.println(pseudo + " : " + line);
                 try {
                     mutex.lock();
