@@ -9,9 +9,13 @@ public class EchoClient {
   *  accepts a connection, receives a message from client then sends an echo to the client
   **/
     public static void main(String[] args){
+        if (args.length != 1) {
+            System.out.println("Usage: java EchoClient <EchoServer host> <EchoServer port>");
+            System.exit(1);
+        }
 
         try {
-            Socket echoSocket = new Socket("localhost",1234); // on crée le socket avec l'hote et le port
+            Socket echoSocket = new Socket(args[0],1234); // on crée le socket avec l'hote et le port
             BufferedReader socIn = new BufferedReader(
                 new InputStreamReader(echoSocket.getInputStream()));   // socIn = ce qui vient du serveur 
             PrintStream socOut= new PrintStream(echoSocket.getOutputStream()); //socOut = ce qui va vers le serveur
