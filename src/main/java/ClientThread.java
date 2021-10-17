@@ -24,44 +24,45 @@ public class ClientThread
 
 
     public void run() {
+        boolean test = true;
         try {
-            //initialisation des variables
-            BufferedReader socIn ;
-            socIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
-            User userActuel = getUserByPseudo(pseudo, listeClients);
-            String interlocuteur = "";
-
-            while (true) {
-                String line = socIn.readLine();
-                if (line.equals("Afficher listeClients")) // si le client a demandé à voir la liste des clients
-                {
-                    callAfficherListeClients(socOut);
-                } else if (line.equals("deconnexion"))
-                {
-                    userActuel.setEtat(false);
-                } else if (line.length() >= 2 && line.startsWith("1:") && !line.substring(2).equals("Revenir au menu"))
-                {
-                    interlocuteur = line.substring(2);
-                    callChoixInterlocuteur(line, socOut);
-                } else if (line.length() >= 9 && line.startsWith("pour tous"))
-                {
-                    interlocuteur = "tous";
-                } else if (line.length() >= 12 && line.startsWith("Conversation"))
-                {
-                   callAfficherConversation(line, socOut);
-                } else
+            if(test) {
+                //initialisation des variables
+                BufferedReader socIn;
+                socIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
+                User userActuel = getUserByPseudo(pseudo, listeClients);
+                String interlocuteur = "";
+                while (true) {
+                    String line = socIn.readLine();
+                    if (line.equals("Afficher listeClients")) // si le client a demandé à voir la liste des clients
                     {
-                    //DISCUSSION BASIQUE
-                    if (!interlocuteur.equals("tous"))
-                    {
-                        callParlerAQuelquun(line, interlocuteur);
+                        callAfficherListeClients(socOut);
+                    } else if (line.equals("deconnexion")) {
+                        userActuel.setEtat(false);
+                        test = false;
+                        break;
+                    } else if (line.length() >= 2 && line.startsWith("1:") && !line.substring(2).equals("Revenir au menu")) {
+                        interlocuteur = line.substring(2);
+                        callChoixInterlocuteur(line, socOut);
+                    } else if (line.length() >= 9 && line.startsWith("pour tous")) {
+                        interlocuteur = "tous";
+                    } else if (line.length() >= 12 && line.startsWith("Conversation")) {
+                        callAfficherConversation(line, socOut);
                     } else {
-                        callParlerATous(line);
-                    }
+                        //DISCUSSION BASIQUE
+                        if (!interlocuteur.equals("tous")) {
+                            callParlerAQuelquun(line, interlocuteur);
+                        } else {
+                            callParlerATous(line);
+                        }
 
+                    }
                 }
             }
+
+
+
         } catch (Exception e) {
             System.err.println("Error in EchoServer:" + e);
         }
@@ -90,7 +91,7 @@ public class ClientThread
 
 
     public void parse() {
-        try (FileWriter file = new FileWriter("./historique.json")) {
+        try (FileWriter file = new FileWriter("../../historique.json")) {
             file.write(jsonHistorique.toJSONString());
             file.flush();
         } catch (IOException e) {
@@ -168,8 +169,10 @@ public class ClientThread
     public void callParlerAQuelquun(String line, String interlocuteur) throws IOException {
         for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
             if (entry.getKey().getPseudo().equals(interlocuteur)) {
-                PrintStream socOutClients = new PrintStream(entry.getValue().getOutputStream());
-                socOutClients.println(pseudo + " : " + line);
+                if(entry.getKey().getEtat()) {
+                    PrintStream socOutClients = new PrintStream(entry.getValue().getOutputStream());
+                    socOutClients.println(pseudo + " : " + line);
+                }
                 try {
                     mutex.lock();
                     fillJson(interlocuteur, line);
