@@ -24,9 +24,9 @@ public class ClientThread
 
 
     public void run() {
-        boolean test = true;
+        boolean inLine = true;
         try {
-            if(test) {
+            if(inLine) {
                 //initialisation des variables
                 BufferedReader socIn;
                 socIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -38,9 +38,10 @@ public class ClientThread
                     if (line.equals("Afficher listeClients")) // si le client a demandé à voir la liste des clients
                     {
                         callAfficherListeClients(socOut);
-                    } else if (line.equals("deconnexion")) {
+                    } else if (line.equals("déconnexion")) {
                         userActuel.setEtat(false);
-                        test = false;
+                        inLine = false;
+                        System.out.println("Deconnexion from " + clientSocket.getLocalAddress());
                         break;
                     } else if (line.length() >= 2 && line.startsWith("1:") && !line.substring(2).equals("Revenir au menu")) {
                         interlocuteur = line.substring(2);
@@ -91,7 +92,7 @@ public class ClientThread
 
 
     public void parse() {
-        try (FileWriter file = new FileWriter("../../historique.json")) {
+        try (FileWriter file = new FileWriter("./historique.json")) {
             file.write(jsonHistorique.toJSONString());
             file.flush();
         } catch (IOException e) {
@@ -117,7 +118,6 @@ public class ClientThread
 
     public void callAfficherListeClients(PrintStream socOut){
         StringBuilder listeToPrint = new StringBuilder();
-
         for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
             if (!entry.getKey().getPseudo().equals(pseudo)) {
                 listeToPrint.append("	-").append(entry.getKey().getPseudo());
@@ -128,7 +128,7 @@ public class ClientThread
                 }
             }
         }
-        socOut.println("listToPrint"+listeToPrint+"A qui voulez-vous parler?");
+        socOut.println("\u001B[33mlistToPrint\u001B[0m"+listeToPrint+"\u001B[33mA qui voulez-vous parler?\u001B[0m");
     }
 
 
@@ -159,8 +159,10 @@ public class ClientThread
     public void callParlerATous(String line) throws IOException {
         for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
             if (!entry.getKey().getPseudo().equals(pseudo)) {
-                PrintStream socOutClients = new PrintStream(entry.getValue().getOutputStream());
-                socOutClients.println("(A tout le monde) " + pseudo + " : " + line);
+                if(entry.getKey().getEtat()) {
+                    PrintStream socOutClients = new PrintStream(entry.getValue().getOutputStream());
+                    socOutClients.println("\u001B[36m(A tout le monde) " + pseudo + " : " + line + "\u001B[0m");
+                }
             }
         }
     }

@@ -91,7 +91,7 @@ public class EchoServerMultiThreaded {
 
     // on remplit le fichier user.json
     public void parseUserJson(JSONArray listeUsersPeristant){
-        try (FileWriter file = new FileWriter("../../users.json")) {
+        try (FileWriter file = new FileWriter("./users.json")) {
             file.write(listeUsersPeristant.toJSONString());
             file.flush();
         } catch (IOException e) {
@@ -102,7 +102,7 @@ public class EchoServerMultiThreaded {
     // On remplit le jsonArray jsonHistorique avec le fichier de conversation historique.json
     public JSONArray fillJsonHistorique(JSONArray jsonHistorique) throws IOException {
         JSONParser jsonParser = new JSONParser();
-        try (FileReader reader = new FileReader("../../historique.json")) {
+        try (FileReader reader = new FileReader("./historique.json")) {
             //Read JSON file
             Object obj = jsonParser.parse(reader);
             jsonHistorique = (JSONArray) obj;
@@ -124,13 +124,13 @@ public class EchoServerMultiThreaded {
 
     public void fillJsonUser() {
         JSONParser jsonParser = new JSONParser();
-        try (FileReader reader = new FileReader("../../users.json")) {
+        try (FileReader reader = new FileReader("./users.json")) {
             //Read JSON file
             Object obj = jsonParser.parse(reader);
             listeUsersPersistant = (JSONArray) obj;
             for (Object element : listeUsersPersistant) {
                 JSONObject objectInArray = (JSONObject) element;
-                String pseudoUser = (String) objectInArray.get("pseudo");
+                String pseudoUser = (String) (objectInArray.get("pseudo"));
                 listeClients.put(new User(pseudoUser),new Socket());
             }
         } catch (IOException | ParseException e) {
