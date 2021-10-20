@@ -30,6 +30,8 @@ public class Client {
                 try {String message = socIn.readLine();
                     String erreurPseudo = "erreur_pseudo";
                     String listUtilisateurs= "listToPrint";
+                    String creationGroupe = "group_created";
+                    String groupeIntrouvable = "group_not_found";
                     if (message.length()>=erreurPseudo.length() && message.startsWith(erreurPseudo)){
                         new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
                         System.out.println(message.substring(erreurPseudo.length()));
@@ -48,12 +50,28 @@ public class Client {
                         } finally {
                             mutex.unlock();
                         }
-                    }else if(message.startsWith(listUtilisateurs)){
-                        if(message.equals(listUtilisateurs+"A qui voulez-vous parler?")) {
+                    }else if(message.startsWith(listUtilisateurs)) {
+                        if (message.equals(listUtilisateurs + "A qui voulez-vous parler?")) {
                             //cas ou aucun utilisateur n'existe dans le base et que la liste affichée lors de l'option 1 est donc vide
                             System.out.println("Désolé, aucun autre utilisateur ou groupe n'existe pour le moment ! Tapez deux fois Entree pour revenir au Menu.");
-                        }else {
-                            System.out.println("Voici la liste des utilisateurs : \n" +message.substring(11));
+                        } else {
+                            System.out.println("Voici la liste des utilisateurs : \n" + message.substring(11));
+                        }
+                    }else if(message.equals(creationGroupe)) {
+                        System.out.println("Le groupe a bien été créé. Cliquez sur Entree pour revenir au Menu");
+                        try {
+                            mutex.lock();
+                            i = 1;
+                        } finally {
+                            mutex.unlock();
+                        }
+                    }else if(message.equals(groupeIntrouvable)){
+                        System.out.println("Ce groupe n'existe pas. Cliquez sur Entree pour revenir au Menu");
+                        try {
+                            mutex.lock();
+                            i = 1;
+                        } finally {
+                            mutex.unlock();
                         }
                     }else{
                         System.out.println(message);
@@ -119,13 +137,14 @@ public class Client {
         }
 
     }
-    public String choix() throws IOException, InterruptedException {
+    public String choix() throws IOException {
         //System.out.print("\033[2J");
         System.out.println("Choisissez une action : ");
         System.out.println("1 : Parler à une personne");
         System.out.println("2 : Parler à tout le monde");
         System.out.println("3 : Parler dans un groupe");
-        System.out.println("4 : Déconnexion");
+        System.out.println("4 : Créer un nouveau groupe");
+        System.out.println("5 : Déconnexion");
         System.out.println("--------------------------");
         return stdIn.readLine();
     }
@@ -172,6 +191,18 @@ public class Client {
         return retour;
     }
 
+    public String creerGroupe() throws IOException {
+        System.out.println("Veuillez renseigner le nom du groupe que vous souhaitez créer :");
+        String nomGroupe = stdIn.readLine();
+        String retour = "";
+        // On tape le pseudo de la personne à qui on veut parler
+        if(nomGroupe.equals("Revenir au menu")) {
+            retour = "retour menu";
+        }else{
+            socOut.println("creerGroupe"+nomGroupe);
+        }
+        return retour;
+    }
 
     // méthode d'affichage du menu, en cas de choix or des propositions on rappelle la fonction
     public String afficherMenu(String choix) throws IOException{
@@ -188,7 +219,10 @@ public class Client {
                 afficherListeGroupes();
                 retour = choisirGroupe();
                 break;
-            case "4" :
+            case "4":
+                retour = creerGroupe();
+                break;
+            case "5" :
             case "." :
                 socOut.println("déconnexion");
                 closeSession();

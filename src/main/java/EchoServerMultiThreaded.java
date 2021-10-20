@@ -44,7 +44,6 @@ public class EchoServerMultiThreaded {
 
 
 
-
             // tant que le serveur est en route
             while (true) {
                 // Noouvelle connexion d'un client
@@ -121,20 +120,6 @@ public class EchoServerMultiThreaded {
         return jsonHistorique;
     }
 
-    // On remplit le jsonArray jsonHistorique avec le fichier de conversation historique.json
-    public JSONArray fillJsonMessagesGroupes(JSONArray jsonMessagesGroupes) throws IOException {
-        JSONParser jsonParser = new JSONParser();
-        try (FileReader reader = new FileReader("./messagesGroupes.json")) {
-            //Read JSON file
-            Object obj = jsonParser.parse(reader);
-            jsonMessagesGroupes = (JSONArray) obj;
-        } catch (FileNotFoundException | ParseException e) {
-            e.printStackTrace();
-        }
-        return jsonMessagesGroupes;
-    }
-
-
     // ajoute un utilisateur à la liste des utilisateurs persistante
     public JSONArray fillListePersistanteUser(String pseudo, JSONArray listeUsersPersistant) {
         JSONObject userObject = new JSONObject();
@@ -163,7 +148,6 @@ public class EchoServerMultiThreaded {
     public void fillJsonGroupes() {
         JSONParser jsonParser = new JSONParser();
         Map<User,Socket> mapMembers = new HashMap<>();
-        ArrayList<String> listeMembresGroupe = new ArrayList<>();
         try (FileReader reader = new FileReader("./groupes.json")) {
             //Read JSON file
             Object obj = jsonParser.parse(reader);
@@ -172,6 +156,7 @@ public class EchoServerMultiThreaded {
                 JSONObject objectInArray = (JSONObject) element;
                 String nomGroupe = (String) (objectInArray.get("nomGroupe"));
                 JSONArray listeMembres=(JSONArray) objectInArray.get("membres");
+                ArrayList<String> listeMembresGroupe = new ArrayList<>();
                 for (Object elementDeMembres : listeMembres) { // pour chaque membre
                     JSONObject userInArray = (JSONObject) elementDeMembres;
                     String pseudoMembre = (String) (userInArray.get("pseudo"));

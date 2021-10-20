@@ -52,28 +52,40 @@ public class ClientThread
                     }else if(line.equals("Afficher listeGroupes"))
                     {
                         callAfficherListeGroupes(socOut);
-                    } else if (line.equals("déconnexion")) {
+                    } else if (line.equals("déconnexion"))
+                    {
                         userActuel.setEtat(false);
                         inLine = false;
                         System.out.println("Deconnexion from " + clientSocket.getLocalAddress());
                         break;
-                    } else if (line.length() >= 2 && line.startsWith("1:") && !line.substring(2).equals("Revenir au menu")) {
+                    } else if (line.length() >= 2 && line.startsWith("1:") && !line.substring(2).equals("Revenir au menu"))
+                    {
                         interlocuteur = line.substring(2);
                         callChoixInterlocuteur(line, socOut);
-                    } else if (line.length() >= 2 && line.startsWith("1bis:") && !line.substring(5).equals("Revenir au menu")) {
+                    } else if (line.length() >= 2 && line.startsWith("1bis:") && !line.substring(5).equals("Revenir au menu"))
+                    {
                         interlocuteur = "group_name" + line.substring(5); // ici interlocuteur = nom groupe
                         callChoixGroupe(line, socOut);
-                    } else if (line.length() >= 9 && line.startsWith("pour tous")) {
+                    } else if (line.length() >= 9 && line.startsWith("pour tous"))
+                    {
                         interlocuteur = "tous";
-                    } else if (line.length() >= 12 && line.startsWith("Conversation")) {
+                    } else if (line.length() >= 12 && line.startsWith("Conversation"))
+                    {
                         callAfficherConversation(line, socOut);
                     } else if (line.length() >= 12 && line.startsWith("GroupeConversation")) {
                         callAfficherGroupeConversation(line, socOut);
+                    }else if(line.length()>= 11 && line.startsWith("creerGroupe"))
+                    {
+                        callCreerGroupe(line.substring(11));
+                        System.out.println("here");
+                        socOut.println("group_created");
                     } else {
                         //DISCUSSION BASIQUE
-                        if (!interlocuteur.equals("tous") && !interlocuteur.startsWith("group_name")) {
+                        if (!interlocuteur.equals("tous") && !interlocuteur.startsWith("group_name"))
+                        {
                             callParlerAQuelquun(line, interlocuteur);
-                        } else if(!interlocuteur.equals("tous") && interlocuteur.startsWith("group_name")) {
+                        } else if(!interlocuteur.equals("tous") && interlocuteur.startsWith("group_name"))
+                        {
                             callParlerAGroupe(line, interlocuteur.substring(10));
                         }else{
                             callParlerATous(line);
@@ -82,9 +94,6 @@ public class ClientThread
                     }
                 }
             }
-
-
-
         } catch (Exception e) {
             System.err.println("Error in EchoServer:" + e);
         }
@@ -127,6 +136,18 @@ public class ClientThread
         elementsMessageGroupe.put("destinataire", nomGroupe);
         elementsMessageGroupe.put("contenu", line);
         jsonMessagesGroupes.add(elementsMessageGroupe);
+    }
+
+    public void fillJsonGroupe(String nomGroupe) {
+        JSONObject elementsGroupe = new JSONObject();
+        JSONArray membres = new JSONArray();
+        JSONObject unMembre = new JSONObject();
+        unMembre.put("pseudo",pseudo);
+        membres.add(unMembre);
+        elementsGroupe.put("nomGroupe", nomGroupe);
+        elementsGroupe.put("membres", membres);
+        listeGroupsPersistant.add(elementsGroupe);
+        parseGroupeUsers();
     }
 
     // ajoute un utilisateur à la liste des utilisateurs persistante
@@ -221,20 +242,15 @@ public class ClientThread
 
 
     public void callAfficherListeGroupes(PrintStream socOut){
-        int count = 0;
         StringBuilder listeToPrint = new StringBuilder();
         for (Groupe groupe : listeGroupes) {
-                listeToPrint.append("	-").append(groupe.getName()).append(" (");
+                listeToPrint.append("  -").append(groupe.getName()).append("\n");
                 //aficher les membres du groupe
             for(String p :groupe.getMembres()){
-                count++;
-                listeToPrint.append(p);
-                if(!(count ==groupe.getMembres().size())){
-                    listeToPrint.append(", ");
-                }
+                listeToPrint.append("\t*").append(p).append("\n");
             }
+            listeToPrint.append("\n");
         }
-        listeToPrint.append(")\n");
         socOut.println("listToPrint"+listeToPrint+"A qui voulez-vous parler?");
     }
 
@@ -251,7 +267,7 @@ public class ClientThread
         //le client a choisi quelqu'un a qui parler
         String groupe = line.substring(5);
         if (!listeGroupes.contains(getGroupByName(groupe, listeGroupes))) {
-            socOut.println("groupe_not_found");
+            socOut.println("group_not_found");
         }
     }
 
@@ -355,6 +371,19 @@ public class ClientThread
                 }
                 break;
             }
+        }
+    }
+
+    public void callCreerGroupe(String nomGroupe){
+        ArrayList<String> membre = new ArrayList<>();
+        membre.add(pseudo);
+        Groupe g = new Groupe(nomGroupe,membre);
+        listeGroupes.add(g);
+        try {
+            mutexGroupe.lock();
+            fillJsonGroupe(nomGroupe);
+        } finally {
+            mutexGroupe.unlock();
         }
     }
 
