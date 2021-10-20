@@ -13,11 +13,12 @@ public class EchoServerMultiThreaded {
     private ServerSocket listenSocket;
     private Map<User, Socket> listeClients = new HashMap<>(); // association des utilisateurs avec leur socket
     private ArrayList<Groupe> listeGroupes= new ArrayList<>();
-    private JSONArray listeGroupsPersistant = new JSONArray(); // liste des utilisateurs existants
+    private JSONArray listeGroupsPersistant = new JSONArray(); // liste des groupes existants
     private JSONArray jsonHistorique = new JSONArray(); // historique des messages
     private JSONArray jsonMessagesGroupes = new JSONArray(); // historique des messages
     private JSONArray listeUsersPersistant = new JSONArray(); // liste des utilisateurs existants
     private ReentrantLock mutex = new ReentrantLock(); //mutex pour protéger l'accès à jsonhistorique
+    private ReentrantLock mutexGroupe = new ReentrantLock(); //mutex pour protéger l'accès à jsonhistorique
 
     public EchoServerMultiThreaded() {
         init();
@@ -66,7 +67,7 @@ public class EchoServerMultiThreaded {
                         listeClients.replace(userPrec, clientSocket);
                         userPrec.setEtat(true);
                         //initialisation du client
-                        ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients,jsonHistorique,mutex, listeGroupes, jsonMessagesGroupes);
+                        ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients,jsonHistorique,mutex, mutexGroupe, listeGroupes, jsonMessagesGroupes, listeGroupsPersistant);
                         ct.start();
                     }
                 } else {
@@ -77,7 +78,7 @@ public class EchoServerMultiThreaded {
                     //remplir la liste persistante des users
                     fillListePersistanteUser(pseudo,listeUsersPersistant);
                     //initialisation du client
-                    ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, jsonHistorique,mutex,listeGroupes, jsonMessagesGroupes);
+                    ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, jsonHistorique,mutex, mutexGroupe, listeGroupes, jsonMessagesGroupes, listeGroupsPersistant);
                     ct.start();
                 }
 

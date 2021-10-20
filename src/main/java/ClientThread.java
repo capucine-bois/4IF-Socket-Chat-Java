@@ -16,8 +16,12 @@ public class ClientThread
     private JSONArray jsonHistorique;
     private JSONArray jsonMessagesGroupes;
     private ReentrantLock mutex;
+    private ReentrantLock mutexGroupe;
+    private JSONArray listeGroupsPersistant ; // liste des groupes existants
 
-    ClientThread(Socket s, String pseudo, Map<User, Socket> liste, JSONArray jsonHistorique, ReentrantLock mutex,ArrayList<Groupe> listeGrpes, JSONArray jsonMessagesGroupes){
+
+
+    ClientThread(Socket s, String pseudo, Map<User, Socket> liste, JSONArray jsonHistorique, ReentrantLock mutex, ReentrantLock mutexGroupe, ArrayList<Groupe> listeGrpes, JSONArray jsonMessagesGroupes, JSONArray listeGroupsPersistant){
         this.listeClients = liste;
         this.listeGroupes=listeGrpes;
         this.pseudo = pseudo;
@@ -25,6 +29,8 @@ public class ClientThread
         this.mutex = mutex;
         this.jsonHistorique = jsonHistorique;
         this.jsonMessagesGroupes= jsonMessagesGroupes;
+        this.mutexGroupe = mutexGroupe;
+        this.listeGroupsPersistant=listeGroupsPersistant;
     }
 
 
@@ -115,6 +121,40 @@ public class ClientThread
         jsonHistorique.add(elementsMessage);
     }
 
+    public void fillJsonMessagesGroupe(String nomGroupe, String line) {
+        JSONObject elementsMessageGroupe = new JSONObject();
+        elementsMessageGroupe.put("expediteur", pseudo);
+        elementsMessageGroupe.put("destinataire", nomGroupe);
+        elementsMessageGroupe.put("contenu", line);
+        jsonMessagesGroupes.add(elementsMessageGroupe);
+    }
+
+    // ajoute un utilisateur à la liste des utilisateurs persistante
+    public void fillListePersistanteUserGroupe(String nomGroupeChoisi) {
+        //add en place
+        for(Object object : listeGroupsPersistant){
+            JSONObject objectInArray = (JSONObject) object;
+            String nomGroupe= objectInArray.get("nomGroupe").toString();
+            if(nomGroupe.equals(nomGroupeChoisi)){
+                JSONArray arrayMembres = (JSONArray) objectInArray.get("membres");
+                JSONObject o = new JSONObject();
+                o.put("pseudo",pseudo);
+                arrayMembres.add(o);
+            }
+        }
+        parseGroupeUsers(); //Exporter le fichier JSON
+    }
+
+
+    public void parseGroupeUsers() {
+        try (FileWriter file = new FileWriter("./groupes.json")) {
+            file.write(listeGroupsPersistant.toJSONString());
+            file.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void parse() {
         try (FileWriter file = new FileWriter("./historique.json")) {
@@ -123,7 +163,16 @@ public class ClientThread
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+
+    public void parseGroupeMessages() {
+        try (FileWriter file = new FileWriter("./messagesGroupe.json")) {
+            file.write(jsonMessagesGroupes.toJSONString());
+            file.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -139,6 +188,7 @@ public class ClientThread
         }
         return listeHistorique.toString();
     }
+
 
     public String afficherGroupeConversation(String groupName) {
         StringBuilder listeHistorique = new StringBuilder();
@@ -227,17 +277,23 @@ public class ClientThread
         } else if (!listeGroupeContientPseudo(group.getMembres(), pseudo)) { // si l'utilisateur ne fait pas encore partie du groupe on le rajoute
             group.addMember(pseudo);
             try {
-                mutex.lock();
+                mutexGroupe.lock();
+                fillListePersistanteUserGroupe(nomGroupe);
+            } finally {
+                mutexGroupe.unlock();
+            }
+            try {
+                mutexGroupe.lock();
                 socOut.print("\n\n\n"+afficherGroupeConversation(nomGroupe));
             } finally {
-                mutex.unlock();
+                mutexGroupe.unlock();
             }
         }else{  // l'utilisateur fait déjà partie du groupe
             try {
-                mutex.lock();
+                mutexGroupe.lock();
                 socOut.print("\n\n\n"+afficherGroupeConversation(nomGroupe));
             } finally {
-                mutex.unlock();
+                mutexGroupe.unlock();
             }
         }
     }
@@ -290,13 +346,13 @@ public class ClientThread
                         socOutClients.println(pseudo + " : " + line);
                     }
                 }
-                /*try {
-                    mutex.lock();
-                    fillJson(nomGroupe, line, pseudo); //pseudo ici = expéditeur dans jsonMessageGroupes
-                    parse(); //Exporter le fichier JSON
+                try {
+                    mutexGroupe.lock();
+                    fillJsonMessagesGroupe(nomGroupe, line); //pseudo ici = expéditeur dans jsonMessageGroupes
+                    parseGroupeMessages(); //Exporter le fichier JSON
                 } finally {
-                    mutex.unlock();
-                }*/
+                    mutexGroupe.unlock();
+                }
                 break;
             }
         }
