@@ -165,8 +165,9 @@ public class ClientThread
                 }
             }
         }
-        socOut.println("listToPrint"+listeToPrint+"A qui voulez-vous parler?\n");
+        socOut.println("listToPrint"+listeToPrint+"A qui voulez-vous parler?");
     }
+
 
 
     public void callAfficherListeGroupes(PrintStream socOut){
@@ -176,17 +177,15 @@ public class ClientThread
                 listeToPrint.append("	-").append(groupe.getName()).append(" (");
                 //aficher les membres du groupe
             for(User u :groupe.getMembres()){
+                count++;
                 listeToPrint.append(u.getPseudo());
-                if(count ==groupe.getMembres().size()){
-                    //groupe.getMembres().size()
+                if(!(count ==groupe.getMembres().size())){
                     listeToPrint.append(", ");
                 }
-                count++;
             }
         }
         listeToPrint.append(")\n");
-        System.out.println(listeToPrint);
-        socOut.println("listToPrint"+listeToPrint+"A qui voulez-vous parler?\n");
+        socOut.println("listToPrint"+listeToPrint+"A qui voulez-vous parler?");
     }
 
 

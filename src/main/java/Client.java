@@ -27,12 +27,11 @@ public class Client {
         // création du thread
         Thread t = new Thread(() -> {
             while (true) {
-                try {
-                    String message = socIn.readLine();
+                try {String message = socIn.readLine();
                     String erreurPseudo = "erreur_pseudo";
                     String listUtilisateurs= "listToPrint";
                     if (message.length()>=erreurPseudo.length() && message.startsWith(erreurPseudo)){
-                        //System.out.print("\033[2J");
+                        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
                         System.out.println(message.substring(erreurPseudo.length()));
                         try {
                             mutex.lock();
@@ -41,17 +40,8 @@ public class Client {
                             mutex.unlock();
                         }
                     }else if (message.equals("user_not_found")) {
-                        //System.out.print("\033[2J");
-                        System.out.println("L'utilisateur renseigné n'existe pas. Tapez sur Entrée pour revenir au menu.");
-                        try {
-                            mutex.lock();
-                            i = 1;
-                        } finally {
-                            mutex.unlock();
-                        }
-                    }else if(message.equals("groupe_not_found")){
-                        //System.out.print("\033[2J");
-                        System.out.println("Le groupe renseigné n'existe pas. Tapez sur Entrée pour revenir au menu.");
+                        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+                        System.out.println("L'utilisateur renseigne n'existe pas. Tapez sur Entree pour revenir au menu.");
                         try {
                             mutex.lock();
                             i = 1;
@@ -61,14 +51,14 @@ public class Client {
                     }else if(message.startsWith(listUtilisateurs)){
                         if(message.equals(listUtilisateurs+"A qui voulez-vous parler?")) {
                             //cas ou aucun utilisateur n'existe dans le base et que la liste affichée lors de l'option 1 est donc vide
-                            System.out.println("Désolé, aucun autre utilisateur ou aucun groupe n'existe pour le moment ! Tapez deux fois Entrée pour revenir au Menu.");
+                            System.out.println("Désolé, aucun autre utilisateur ou groupe n'existe pour le moment ! Tapez deux fois Entree pour revenir au Menu.");
                         }else {
-                            System.out.println("Voici la liste :" + message.substring(20));
+                            System.out.println("Voici la liste des utilisateurs : \n" +message.substring(11));
                         }
                     }else{
-                        System.out.print(message);
+                        System.out.println(message);
                     }
-                } catch (IOException e) {
+                } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                     break;
                 }
