@@ -61,9 +61,9 @@ public class Client {
                     }else if(message.startsWith(listUtilisateurs)){
                         if(message.equals(listUtilisateurs+"\u001B[33mA qui voulez-vous parler?\u001B[0m")) {
                             //cas ou aucun utilisateur n'existe dans le base et que la liste affichée lors de l'option 1 est donc vide
-                            System.out.println("\u001B[33mDésolé, aucun autre utilisateur n'existe pour le moment ! Tapez deux fois Entrée pour revenir au Menu.\u001B[0m");
+                            System.out.println("\u001B[33mDésolé, aucun autre utilisateur ou aucun groupe n'existe pour le moment ! Tapez deux fois Entrée pour revenir au Menu.\u001B[0m");
                         }else {
-                            System.out.println("\u001B[33mVoici la liste des utilisateurs :\n\u001B[0m" + message.substring(20)+"\u001B[0m");
+                            System.out.println("\u001B[33mVoici la liste :\n\u001B[0m" + message.substring(20)+"\u001B[0m");
                         }
                     }else{
                         System.out.print(message);

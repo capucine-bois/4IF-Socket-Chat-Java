@@ -1,4 +1,5 @@
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.*;
 import java.security.acl.Group;
 import java.util.*;
@@ -11,7 +12,7 @@ public class EchoServerMultiThreaded {
     // Initialisation des variables
     private ServerSocket listenSocket;
     private Map<User, Socket> listeClients = new HashMap<>(); // association des utilisateurs avec leur socket
-    private Map<Groupe, Map<User,Socket>> listeGroupes;
+    private ArrayList<Groupe> listeGroupes= new ArrayList<>();
     private JSONArray listeGroupsPersistant = new JSONArray(); // liste des utilisateurs existants
     private JSONArray jsonHistorique = new JSONArray(); // historique des messages
     private JSONArray jsonMessagesGroupes = new JSONArray(); // historique des messages
@@ -75,7 +76,6 @@ public class EchoServerMultiThreaded {
                     user.setEtat(true);
                     //remplir la liste persistante des users
                     fillListePersistanteUser(pseudo,listeUsersPersistant);
-
                     //initialisation du client
                     ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, jsonHistorique,mutex,listeGroupes, jsonMessagesGroupes);
                     ct.start();
@@ -175,13 +175,9 @@ public class EchoServerMultiThreaded {
                     JSONObject userInArray = (JSONObject) elementDeMembres;
                     String pseudoMembre = (String) (userInArray.get("pseudo"));
                     User u = new User(pseudoMembre);
-                    mapMembers.put(u,new Socket());
                     listeMembresGroupe.add(u);
                 }
-
-
-                listeGroupes.put(new Groupe(nomGroupe,listeMembresGroupe), mapMembers);
-                System.out.println(listeGroupes);
+                listeGroupes.add(new Groupe(nomGroupe,listeMembresGroupe));
             }
         } catch (IOException | ParseException e) {
             e.printStackTrace();
