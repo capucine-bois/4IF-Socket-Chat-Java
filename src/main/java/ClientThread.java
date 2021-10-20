@@ -12,7 +12,7 @@ public class ClientThread
     private Socket clientSocket;
     private String pseudo;
     private Map<User, Socket> listeClients;
-    private ArrayList<Groupe> listeGroupes = new ArrayList<>();
+    private ArrayList<Groupe> listeGroupes;
     private JSONArray jsonHistorique;
     private JSONArray jsonMessagesGroupes;
     private ReentrantLock mutex;
@@ -176,9 +176,9 @@ public class ClientThread
         for (Groupe groupe : listeGroupes) {
                 listeToPrint.append("	-").append(groupe.getName()).append(" (");
                 //aficher les membres du groupe
-            for(User u :groupe.getMembres()){
+            for(String p :groupe.getMembres()){
                 count++;
-                listeToPrint.append(u.getPseudo());
+                listeToPrint.append(p);
                 if(!(count ==groupe.getMembres().size())){
                     listeToPrint.append(", ");
                 }
@@ -221,12 +221,11 @@ public class ClientThread
 
     public void callAfficherGroupeConversation(String line, PrintStream socOut){
         String nomGroupe = line.substring(18);
-        User userActuel= getUserByPseudo(pseudo, listeClients);
         Groupe group = getGroupByName(nomGroupe, listeGroupes);
         if (!listeGroupes.contains(group)) { // vérifier que le groupe existe bien
             socOut.println(); // on ne renvoie rien pour passer à l'appel ChoisirGroupe de Client.java
         } else if (!listeGroupeContientPseudo(group.getMembres(), pseudo)) { // si l'utilisateur ne fait pas encore partie du groupe on le rajoute
-            group.addMember(userActuel);
+            group.addMember(pseudo);
             try {
                 mutex.lock();
                 socOut.print("\n\n\n"+afficherGroupeConversation(nomGroupe));
@@ -278,12 +277,12 @@ public class ClientThread
         PrintStream socOutClients = null;
         for (Groupe groupe : listeGroupes) {
             if (groupe.getName().equals(nomGroupe)) { //vérifier le bon groupe
-                ArrayList<User> listUsers = groupe.getMembres();
-                for(User u : listUsers){ // envoyer aux bons membres du groupe
-                    if(u.getEtat() && u.getPseudo()!=pseudo) {
+                ArrayList<String> listUsers = groupe.getMembres();
+                for(String p : listUsers){ // envoyer aux bons membres du groupe
+                    if(getUserByPseudo(p,listeClients).getEtat() && !(p.equals(pseudo))) {
                         //on récupère la socket client
                         for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
-                            if (entry.getKey().getPseudo() == u.getPseudo()) {
+                            if (entry.getKey().getPseudo().equals(p)) {
                                 socOutClients = new PrintStream(entry.getValue().getOutputStream());
                                 break;
                             }
@@ -303,14 +302,15 @@ public class ClientThread
         }
     }
 
-    public boolean listeGroupeContientPseudo(ArrayList<User> liste, String pseudo){
+    public boolean listeGroupeContientPseudo(ArrayList<String> liste, String pseudo){
         boolean contient = false;
-        for(User u : liste){
-            if (u.getPseudo().equals(pseudo)){
+        for(String p : liste){
+            if (p.equals(pseudo)){
                 contient = true;
                 break;
             }
         }
         return contient;
     }
+
 }

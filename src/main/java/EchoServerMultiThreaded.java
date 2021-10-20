@@ -27,7 +27,7 @@ public class EchoServerMultiThreaded {
         try {
             BufferedReader socIn;
             listenSocket = new ServerSocket(1234); //port
-            String pseudo = "";
+            String pseudo;
             System.out.println("Server ready...");
             PrintStream socOut;
             User user;
@@ -162,7 +162,7 @@ public class EchoServerMultiThreaded {
     public void fillJsonGroupes() {
         JSONParser jsonParser = new JSONParser();
         Map<User,Socket> mapMembers = new HashMap<>();
-        ArrayList<User> listeMembresGroupe = new ArrayList<>();
+        ArrayList<String> listeMembresGroupe = new ArrayList<>();
         try (FileReader reader = new FileReader("./groupes.json")) {
             //Read JSON file
             Object obj = jsonParser.parse(reader);
@@ -174,8 +174,7 @@ public class EchoServerMultiThreaded {
                 for (Object elementDeMembres : listeMembres) { // pour chaque membre
                     JSONObject userInArray = (JSONObject) elementDeMembres;
                     String pseudoMembre = (String) (userInArray.get("pseudo"));
-                    User u = new User(pseudoMembre);
-                    listeMembresGroupe.add(u);
+                    listeMembresGroupe.add(pseudoMembre);
                 }
                 listeGroupes.add(new Groupe(nomGroupe,listeMembresGroupe));
             }

@@ -2,19 +2,19 @@ import java.util.ArrayList;
 
 public class Groupe {
     private String name;
-    private ArrayList<User> membres;
+    private ArrayList<String> membres;
 
-    public Groupe(String name, ArrayList<User>  membres) {
+    public Groupe(String name, ArrayList<String>  membres) {
         this.name = name;
         this.membres = membres;
     }
 
     public String getName(){  return name;  }
 
-    public ArrayList<User> getMembres() { return membres; }
+    public ArrayList<String> getMembres() { return membres; }
 
-    public void addMember(User userToAdd){
-        membres.add(userToAdd);
+    public void addMember(String userPseudoToAdd){
+        membres.add(userPseudoToAdd);
     }
 
 }
