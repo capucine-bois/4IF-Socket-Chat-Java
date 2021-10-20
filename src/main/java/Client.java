@@ -30,10 +30,10 @@ public class Client {
                 try {
                     String message = socIn.readLine();
                     String erreurPseudo = "erreur_pseudo";
-                    String listUtilisateurs= "\u001B[33mlistToPrint\u001B[0m";
+                    String listUtilisateurs= "listToPrint";
                     if (message.length()>=erreurPseudo.length() && message.startsWith(erreurPseudo)){
-                        System.out.print("\033[2J");
-                        System.out.println("\u001B[31m"+message.substring(erreurPseudo.length())+"\u001B[0m");
+                        //System.out.print("\033[2J");
+                        System.out.println(message.substring(erreurPseudo.length()));
                         try {
                             mutex.lock();
                             i=3;
@@ -41,8 +41,8 @@ public class Client {
                             mutex.unlock();
                         }
                     }else if (message.equals("user_not_found")) {
-                        System.out.print("\033[2J");
-                        System.out.println("\u001B[31mL'utilisateur renseigné n'existe pas. Tapez sur Entrée pour revenir au menu.\u001B[0m");
+                        //System.out.print("\033[2J");
+                        System.out.println("L'utilisateur renseigné n'existe pas. Tapez sur Entrée pour revenir au menu.");
                         try {
                             mutex.lock();
                             i = 1;
@@ -50,8 +50,8 @@ public class Client {
                             mutex.unlock();
                         }
                     }else if(message.equals("groupe_not_found")){
-                        System.out.print("\033[2J");
-                        System.out.println("\u001B[31mLe groupe renseigné n'existe pas. Tapez sur Entrée pour revenir au menu.\u001B[0m");
+                        //System.out.print("\033[2J");
+                        System.out.println("Le groupe renseigné n'existe pas. Tapez sur Entrée pour revenir au menu.");
                         try {
                             mutex.lock();
                             i = 1;
@@ -59,11 +59,11 @@ public class Client {
                             mutex.unlock();
                         }
                     }else if(message.startsWith(listUtilisateurs)){
-                        if(message.equals(listUtilisateurs+"\u001B[33mA qui voulez-vous parler?\u001B[0m")) {
+                        if(message.equals(listUtilisateurs+"A qui voulez-vous parler?")) {
                             //cas ou aucun utilisateur n'existe dans le base et que la liste affichée lors de l'option 1 est donc vide
-                            System.out.println("\u001B[33mDésolé, aucun autre utilisateur ou aucun groupe n'existe pour le moment ! Tapez deux fois Entrée pour revenir au Menu.\u001B[0m");
+                            System.out.println("Désolé, aucun autre utilisateur ou aucun groupe n'existe pour le moment ! Tapez deux fois Entrée pour revenir au Menu.");
                         }else {
-                            System.out.println("\u001B[33mVoici la liste :\n\u001B[0m" + message.substring(20)+"\u001B[0m");
+                            System.out.println("Voici la liste :" + message.substring(20));
                         }
                     }else{
                         System.out.print(message);
@@ -81,11 +81,11 @@ public class Client {
         String personneCo ="";
         while (true) {
             if(i==0){
-                System.out.println("\u001B[33m---------------------------------------------------------------");
+                System.out.println("---------------------------------------------------------------");
                 System.out.println("                   BIENVENUE DANS LE CHAT                      ");
                 System.out.println("---------------------------------------------------------------");
 
-                System.out.println("Saisissez votre identifiant\u001B[0m");
+                System.out.println("Saisissez votre identifiant");
                 pseudo=stdIn.readLine(); //on écrit une ligne au clavier
                 socOut.println(pseudo);
                 Thread.sleep(50);
@@ -130,13 +130,13 @@ public class Client {
 
     }
     public String choix() throws IOException, InterruptedException {
-        System.out.print("\033[2J");
-        System.out.println("\u001B[33mChoisissez une action : ");
+        //System.out.print("\033[2J");
+        System.out.println("Choisissez une action : ");
         System.out.println("1 : Parler à une personne");
         System.out.println("2 : Parler à tout le monde");
         System.out.println("3 : Parler dans un groupe");
         System.out.println("4 : Déconnexion");
-        System.out.println("--------------------------\u001B[0m");
+        System.out.println("--------------------------");
         return stdIn.readLine();
     }
 

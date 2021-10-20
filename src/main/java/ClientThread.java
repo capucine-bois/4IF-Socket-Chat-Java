@@ -165,7 +165,7 @@ public class ClientThread
                 }
             }
         }
-        socOut.println("\u001B[33mlistToPrint\u001B[0m"+listeToPrint+"\u001B[33mA qui voulez-vous parler?\n\u001B[0m");
+        socOut.println("listToPrint"+listeToPrint+"A qui voulez-vous parler?\n");
     }
 
 
@@ -173,19 +173,20 @@ public class ClientThread
         int count = 0;
         StringBuilder listeToPrint = new StringBuilder();
         for (Groupe groupe : listeGroupes) {
-                listeToPrint.append("	-").append(groupe.getName()).append("(");
+                listeToPrint.append("	-").append(groupe.getName()).append(" (");
                 //aficher les membres du groupe
             for(User u :groupe.getMembres()){
-                count++;
                 listeToPrint.append(u.getPseudo());
-                if(count ==groupe.getMembres().size()-1){
+                if(count ==groupe.getMembres().size()){
+                    //groupe.getMembres().size()
                     listeToPrint.append(", ");
                 }
+                count++;
             }
         }
         listeToPrint.append(")\n");
         System.out.println(listeToPrint);
-        socOut.println("\u001B[33mlistToPrint\u001B[0m"+listeToPrint+"\u001B[33mA qui voulez-vous parler?\n\u001B[0m");
+        socOut.println("listToPrint"+listeToPrint+"A qui voulez-vous parler?\n");
     }
 
 
@@ -248,7 +249,7 @@ public class ClientThread
             if (!entry.getKey().getPseudo().equals(pseudo)) {
                 if(entry.getKey().getEtat()) {
                     PrintStream socOutClients = new PrintStream(entry.getValue().getOutputStream());
-                    socOutClients.println("\u001B[36m(A tout le monde) " + pseudo + " : " + line + "\u001B[0m");
+                    socOutClients.println("(A tout le monde) " + pseudo + " : " + line);
                 }
             }
         }
