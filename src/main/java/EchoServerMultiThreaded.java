@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.security.acl.Group;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import org.json.simple.*;
@@ -10,7 +11,10 @@ public class EchoServerMultiThreaded {
     // Initialisation des variables
     private ServerSocket listenSocket;
     private Map<User, Socket> listeClients = new HashMap<>(); // association des utilisateurs avec leur socket
+    private Map<Groupe, Map<User,Socket>> listeGroupes;
+    private JSONArray listeGroupsPersistant = new JSONArray(); // liste des utilisateurs existants
     private JSONArray jsonHistorique = new JSONArray(); // historique des messages
+    private JSONArray jsonMessagesGroupes = new JSONArray(); // historique des messages
     private JSONArray listeUsersPersistant = new JSONArray(); // liste des utilisateurs existants
     private ReentrantLock mutex = new ReentrantLock(); //mutex pour protéger l'accès à jsonhistorique
 
@@ -29,10 +33,14 @@ public class EchoServerMultiThreaded {
 
             // Ouverture du fichier json historique des messages
             jsonHistorique = fillJsonHistorique(jsonHistorique);
-
+            //jsonMessagesGroupes = fillJsonMessagesGroupes(jsonMessagesGroupes);
 
             // Ouverture du JSON USERS
             fillJsonUser();
+            //Ouverture du JSON GROUPES
+            fillJsonGroupes();
+
+
 
 
             // tant que le serveur est en route
@@ -57,7 +65,7 @@ public class EchoServerMultiThreaded {
                         listeClients.replace(userPrec, clientSocket);
                         userPrec.setEtat(true);
                         //initialisation du client
-                        ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients,jsonHistorique,mutex);
+                        ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients,jsonHistorique,mutex, listeGroupes, jsonMessagesGroupes);
                         ct.start();
                     }
                 } else {
@@ -69,7 +77,7 @@ public class EchoServerMultiThreaded {
                     fillListePersistanteUser(pseudo,listeUsersPersistant);
 
                     //initialisation du client
-                    ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, jsonHistorique,mutex);
+                    ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, jsonHistorique,mutex,listeGroupes, jsonMessagesGroupes);
                     ct.start();
                 }
 
@@ -112,6 +120,19 @@ public class EchoServerMultiThreaded {
         return jsonHistorique;
     }
 
+    // On remplit le jsonArray jsonHistorique avec le fichier de conversation historique.json
+    public JSONArray fillJsonMessagesGroupes(JSONArray jsonMessagesGroupes) throws IOException {
+        JSONParser jsonParser = new JSONParser();
+        try (FileReader reader = new FileReader("./messagesGroupes.json")) {
+            //Read JSON file
+            Object obj = jsonParser.parse(reader);
+            jsonMessagesGroupes = (JSONArray) obj;
+        } catch (FileNotFoundException | ParseException e) {
+            e.printStackTrace();
+        }
+        return jsonMessagesGroupes;
+    }
+
 
     // ajoute un utilisateur à la liste des utilisateurs persistante
     public JSONArray fillListePersistanteUser(String pseudo, JSONArray listeUsersPersistant) {
@@ -132,6 +153,35 @@ public class EchoServerMultiThreaded {
                 JSONObject objectInArray = (JSONObject) element;
                 String pseudoUser = (String) (objectInArray.get("pseudo"));
                 listeClients.put(new User(pseudoUser),new Socket());
+            }
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void fillJsonGroupes() {
+        JSONParser jsonParser = new JSONParser();
+        Map<User,Socket> mapMembers = new HashMap<>();
+        ArrayList<User> listeMembresGroupe = new ArrayList<>();
+        try (FileReader reader = new FileReader("./groupes.json")) {
+            //Read JSON file
+            Object obj = jsonParser.parse(reader);
+            listeGroupsPersistant = (JSONArray) obj;
+            for (Object element : listeGroupsPersistant) {
+                JSONObject objectInArray = (JSONObject) element;
+                String nomGroupe = (String) (objectInArray.get("nomGroupe"));
+                JSONArray listeMembres=(JSONArray) objectInArray.get("membres");
+                for (Object elementDeMembres : listeMembres) { // pour chaque membre
+                    JSONObject userInArray = (JSONObject) elementDeMembres;
+                    String pseudoMembre = (String) (userInArray.get("pseudo"));
+                    User u = new User(pseudoMembre);
+                    mapMembers.put(u,new Socket());
+                    listeMembresGroupe.add(u);
+                }
+
+
+                listeGroupes.put(new Groupe(nomGroupe,listeMembresGroupe), mapMembers);
+                System.out.println(listeGroupes);
             }
         } catch (IOException | ParseException e) {
             e.printStackTrace();

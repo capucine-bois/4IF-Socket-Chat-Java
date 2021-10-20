@@ -49,6 +49,15 @@ public class Client {
                         } finally {
                             mutex.unlock();
                         }
+                    }else if(message.equals("groupe_not_found")){
+                        System.out.print("\033[2J");
+                        System.out.println("\u001B[31mLe groupe renseigné n'existe pas. Tapez sur Entrée pour revenir au menu.\u001B[0m");
+                        try {
+                            mutex.lock();
+                            i = 1;
+                        } finally {
+                            mutex.unlock();
+                        }
                     }else if(message.startsWith(listUtilisateurs)){
                         if(message.equals(listUtilisateurs+"\u001B[33mA qui voulez-vous parler?\u001B[0m")) {
                             //cas ou aucun utilisateur n'existe dans le base et que la liste affichée lors de l'option 1 est donc vide
@@ -57,7 +66,7 @@ public class Client {
                             System.out.println("\u001B[33mVoici la liste des utilisateurs :\n\u001B[0m" + message.substring(20)+"\u001B[0m");
                         }
                     }else{
-                        System.out.println(message);
+                        System.out.print(message);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -125,7 +134,8 @@ public class Client {
         System.out.println("\u001B[33mChoisissez une action : ");
         System.out.println("1 : Parler à une personne");
         System.out.println("2 : Parler à tout le monde");
-        System.out.println("3 : Déconnexion");
+        System.out.println("3 : Parler dans un groupe");
+        System.out.println("4 : Déconnexion");
         System.out.println("--------------------------\u001B[0m");
         return stdIn.readLine();
     }
@@ -151,6 +161,28 @@ public class Client {
         return retour;
     }
 
+    public void afficherListeGroupes() {
+        // on récupère la liste des personnes qui ont un compte
+        socOut.println("Afficher listeGroupes"); // à implémenter
+    }
+
+    public String choisirGroupe() throws IOException {
+        String groupeChoisi = stdIn.readLine();
+        String retour = "";
+        // On tape le pseudo de la personne à qui on veut parler
+        if(groupeChoisi.equals("Revenir au menu")) {
+            retour = "retour menu";
+        }
+        else {
+            // on charge la conversation avec l'utilisateur choisi
+            socOut.println("GroupeConversation" + groupeChoisi);
+            //on peut parler
+            socOut.println("1bis:"+groupeChoisi);
+        }
+        return retour;
+    }
+
+
     // méthode d'affichage du menu, en cas de choix or des propositions on rappelle la fonction
     public String afficherMenu(String choix) throws IOException{
         String retour = "";
@@ -163,6 +195,10 @@ public class Client {
                 socOut.println("pour tous");
                 break;
             case "3" :
+                afficherListeGroupes();
+                retour = choisirGroupe();
+                break;
+            case "4" :
             case "." :
                 socOut.println("déconnexion");
                 closeSession();

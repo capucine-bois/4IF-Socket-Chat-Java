@@ -11,15 +11,19 @@ public class ClientThread
     private Socket clientSocket;
     private String pseudo;
     private Map<User, Socket> listeClients;
+    private Map<Groupe, Map<User,Socket>> listeGroupes;
     private JSONArray jsonHistorique;
+    private JSONArray jsonMessagesGroupes;
     private ReentrantLock mutex;
 
-    ClientThread(Socket s, String pseudo, Map<User, Socket> liste, JSONArray jsonHistorique, ReentrantLock mutex){
+    ClientThread(Socket s, String pseudo, Map<User, Socket> liste, JSONArray jsonHistorique, ReentrantLock mutex,Map<Groupe,Map<User, Socket>> listeGrpes, JSONArray jsonMessagesGroupes){
         this.listeClients = liste;
+        this.listeGroupes=listeGrpes;
         this.pseudo = pseudo;
         this.clientSocket = s;
         this.mutex = mutex;
         this.jsonHistorique = jsonHistorique;
+        this.jsonMessagesGroupes= jsonMessagesGroupes;
     }
 
 
@@ -38,6 +42,9 @@ public class ClientThread
                     if (line.equals("Afficher listeClients")) // si le client a demandé à voir la liste des clients
                     {
                         callAfficherListeClients(socOut);
+                    }else if(line.equals("Afficher listeGroupes"))
+                    {
+                        callAfficherListeGroupes(socOut);
                     } else if (line.equals("déconnexion")) {
                         userActuel.setEtat(false);
                         inLine = false;
@@ -46,15 +53,22 @@ public class ClientThread
                     } else if (line.length() >= 2 && line.startsWith("1:") && !line.substring(2).equals("Revenir au menu")) {
                         interlocuteur = line.substring(2);
                         callChoixInterlocuteur(line, socOut);
+                    } else if (line.length() >= 2 && line.startsWith("1bis:") && !line.substring(5).equals("Revenir au menu")) {
+                        interlocuteur = "group_name" + line.substring(5); // ici interlocuteur = nom groupe
+                        callChoixGroupe(line, socOut);
                     } else if (line.length() >= 9 && line.startsWith("pour tous")) {
                         interlocuteur = "tous";
                     } else if (line.length() >= 12 && line.startsWith("Conversation")) {
                         callAfficherConversation(line, socOut);
+                    } else if (line.length() >= 12 && line.startsWith("GroupeConversation")) {
+                        callAfficherGroupeConversation(line, socOut);
                     } else {
                         //DISCUSSION BASIQUE
-                        if (!interlocuteur.equals("tous")) {
+                        if (!interlocuteur.equals("tous") && !interlocuteur.startsWith("group_name")) {
                             callParlerAQuelquun(line, interlocuteur);
-                        } else {
+                        } else if(!interlocuteur.equals("tous") && interlocuteur.startsWith("group_name")) {
+                            callParlerAGroupe(line, interlocuteur.substring(10));
+                        }else{
                             callParlerATous(line);
                         }
 
@@ -81,6 +95,16 @@ public class ClientThread
         return userPrec;
     }
 
+    public static Groupe getGroupByName(String name, Map<Groupe, Map<User,Socket>> listeGroupes) {
+        Groupe groupePrec = null;
+        for (Map.Entry<Groupe, Map<User,Socket>> entry : listeGroupes.entrySet()) {
+            if (entry.getKey().getName().equals(name)) {
+                groupePrec = entry.getKey();
+                break;
+            }
+        }
+        return groupePrec;
+    }
 
     public void fillJson(String interlocuteur, String line) {
         JSONObject elementsMessage = new JSONObject();
@@ -115,6 +139,18 @@ public class ClientThread
         return listeHistorique.toString();
     }
 
+    public String afficherGroupeConversation(String groupName) {
+        StringBuilder listeHistorique = new StringBuilder();
+        for (Object elementGroup : jsonMessagesGroupes) {
+            JSONObject objectInArray = (JSONObject) elementGroup;
+            String destinataire = (String) objectInArray.get("destinataire");
+            String expediteur = (String) objectInArray.get("expediteur");
+            if (groupName.equals(destinataire)) {
+                listeHistorique.append(expediteur).append(" : ").append(objectInArray.get("contenu")).append("\n");
+            }
+        }
+        return listeHistorique.toString();
+    }
 
     public void callAfficherListeClients(PrintStream socOut){
         StringBuilder listeToPrint = new StringBuilder();
@@ -132,6 +168,19 @@ public class ClientThread
     }
 
 
+    public void callAfficherListeGroupes(PrintStream socOut){
+        StringBuilder listeToPrint = new StringBuilder();
+        for (Map.Entry<Groupe, Map<User,Socket>> entry : listeGroupes.entrySet()) {
+                listeToPrint.append("	-").append(entry.getKey().getName());
+                //aficher les membres du groupe
+            for(User u :entry.getKey().getMembres()){
+                listeToPrint.append("\n     *").append(u.getPseudo());
+            }
+        }
+        socOut.println("\u001B[33mlistToPrint\u001B[0m"+listeToPrint+"\u001B[33mA qui voulez-vous parler?\u001B[0m");
+    }
+
+
     public void callChoixInterlocuteur(String line, PrintStream socOut){
         //le client a choisi quelqu'un a qui parler
         String interlocuteur = line.substring(2);
@@ -140,6 +189,13 @@ public class ClientThread
         }
     }
 
+    public void callChoixGroupe(String line, PrintStream socOut){
+        //le client a choisi quelqu'un a qui parler
+        String groupe = line.substring(5);
+        if (!listeGroupes.containsKey(getGroupByName(groupe, listeGroupes))) {
+            socOut.println("groupe_not_found");
+        }
+    }
 
     public void callAfficherConversation(String line, PrintStream socOut){
         String contact = line.substring(12);
@@ -155,6 +211,23 @@ public class ClientThread
         }
     }
 
+    public void callAfficherGroupeConversation(String line, PrintStream socOut){
+        String nomGroupe = line.substring(18);
+        User userActuel= getUserByPseudo(pseudo, listeClients);
+        Groupe group = getGroupByName(nomGroupe, listeGroupes);
+        if (!listeGroupes.containsKey(group)) { // vérifier que le groupe existe bien
+            socOut.println(); // on ne renvoi rien pour passer à l'appel ChoisirGroupe de Client.java
+        } else if (!group.getMembres().contains(userActuel)) { // si l'utilisateur ne fait pas encore partie du groupe on le rajoute
+            group.addMember(userActuel);
+        }else{  // l'utilisateur fait déjà partie du gorupe
+            try {
+                mutex.lock();
+                socOut.print("\n\n\n"+afficherGroupeConversation(nomGroupe));
+            } finally {
+                mutex.unlock();
+            }
+        }
+    }
 
     public void callParlerATous(String line) throws IOException {
         for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
@@ -187,6 +260,25 @@ public class ClientThread
         }
     }
 
+    public void callParlerAGroupe(String line, String nomGroupe) throws IOException {
+        for (Map.Entry<Groupe,Map<User, Socket>> entry : listeGroupes.entrySet()) {
+            if (entry.getKey().getName().equals(nomGroupe)) { //vérifier le bon groupe
+                Map<User,Socket> mapUsers = entry.getValue();
+                for(Map.Entry<User, Socket> entryUsers : mapUsers.entrySet()){ // envoyer aux bons membres du groupe
+                    if(entryUsers.getKey().getEtat() && entryUsers.getKey().getPseudo()!=pseudo) {
+                        PrintStream socOutClients = new PrintStream(entryUsers.getValue().getOutputStream());
+                        socOutClients.println(pseudo + " : " + line);
+                    }
+                }
+                /*try {
+                    mutex.lock();
+                    fillJson(nomGroupe, line, pseudo); //pseudo ici = expéditeur dans jsonMessageGroupes
+                    parse(); //Exporter le fichier JSON
+                } finally {
+                    mutex.unlock();
+                }*/
+                break;
+            }
+        }
+    }
 }
-
-  
