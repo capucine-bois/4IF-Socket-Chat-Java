@@ -51,7 +51,6 @@ public class EchoServerMultiThreaded {
                 socIn = new BufferedReader(
                         new InputStreamReader(clientSocket.getInputStream()));
                 System.out.println("Connexion from:" + clientSocket.getInetAddress());
-
                 // on récupère l'utilisateur s'il existe
                 pseudo = socIn.readLine();
                 User userPrec = getUserByPseudo(pseudo, listeClients);

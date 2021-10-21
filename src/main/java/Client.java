@@ -41,6 +41,8 @@ public class Client {
                             mutex.unlock();
                         }
                     }else if (message.equals("user_not_found")) {
+                        System.out.print("\033[H\033[2J");
+                        System.out.flush();
                         System.out.println("\u001B[31mL'utilisateur renseigné n'existe pas. Tapez sur Entrée pour revenir au menu.\u001B[0m");
                         try {
                             mutex.lock();
@@ -48,15 +50,23 @@ public class Client {
                         } finally {
                             mutex.unlock();
                         }
-                    }else if(message.startsWith(listUtilisateurs)) {
-                        if(message.equals(listUtilisateurs+"\u001B[33m\nA qui voulez-vous parler?\u001B[0m")) {
-                            //cas ou aucun utilisateur n'existe dans le base et que la liste affichée lors de l'option 1 est donc vide
-                            System.out.println("\u001B[31mDésolé, aucun autre utilisateur ou groupe n'existe pour le moment ! Tapez deux fois Entrée pour revenir au Menu.\u001B[0m");
-                        } else {
-                            System.out.println("\u001B[33mVoici la liste :\n\n\u001B[0m" + message.substring(20)+"\u001B[0m");
+                    }else if(message.equals("isEmpty")){
+                        //cas ou aucun utilisateur n'existe dans le base et que la liste affichée lors de l'option 1 est donc vide
+                        System.out.print("\033[H\033[2J");
+                        System.out.flush();
+                        System.out.println("\u001B[31mDésolé, aucun autre utilisateur ou groupe n'existe pour le moment ! Tapez deux fois Entrée pour revenir au Menu.\u001B[0m");
+                        try {
+                            mutex.lock();
+                            i = 1;
+                        } finally {
+                            mutex.unlock();
                         }
+                    }else if(message.startsWith(listUtilisateurs)) {
+                            System.out.println("\u001B[33mVoici la liste :\n\n\u001B[0m" + message.substring(20)+"\u001B[0m");
                     }else if(message.startsWith(creationGroupe)) {
                         if(message.equals(creationGroupe+"_error")) {
+                            System.out.print("\033[H\033[2J");
+                            System.out.flush();
                             System.out.println("\u001B[31mERREUR, ce groupe existe déjà, veuillez choisir un autre nom et réessayer d'en créer en revenant au menu (appuyer sur Entree).\u001B[0m");
                         }else {
                             System.out.println("\u001B[33mLe groupe a bien été créé. Cliquez sur Entree pour revenir au Menu\u001B[0m");
@@ -68,6 +78,8 @@ public class Client {
                         }
 
                     }else if(message.equals(groupeIntrouvable)){
+                        System.out.print("\033[H\033[2J");
+                        System.out.flush();
                         System.out.println("\u001B[31mCe groupe n'existe pas. Cliquez sur Entree pour revenir au Menu\u001B[0m");
                         try {
                             mutex.lock();
@@ -95,7 +107,7 @@ public class Client {
                 System.out.println("                   BIENVENUE DANS LE CHAT                      ");
                 System.out.println("---------------------------------------------------------------");
 
-                System.out.println("Saisissez votre identifiant\u001B[0m");
+                System.out.println("Saisissez votre pseudo\u001B[0m");
                 pseudo=stdIn.readLine(); //on écrit une ligne au clavier
                 socOut.println(pseudo);
                 Thread.sleep(50);
@@ -191,6 +203,8 @@ public class Client {
             socOut.println("GroupeConversation" + groupeChoisi);
             //on peut parler
             socOut.println("1bis:"+groupeChoisi);
+
+
         }
         return retour;
     }

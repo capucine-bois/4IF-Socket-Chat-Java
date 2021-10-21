@@ -205,6 +205,7 @@ public class ClientThread
                 listeHistorique.append(expediteur).append(" : ").append(objectInArray.get("contenu")).append("\n");
             }
         }
+        listeHistorique.append(" ");
         return listeHistorique.substring(0,listeHistorique.length()-1);
     }
 
@@ -219,37 +220,48 @@ public class ClientThread
                 listeHistorique.append(expediteur).append(" : ").append(objectInArray.get("contenu")).append("\n");
             }
         }
+        listeHistorique.append(" ");
         return listeHistorique.substring(0,listeHistorique.length()-1);
     }
 
     public void callAfficherListeClients(PrintStream socOut){
         StringBuilder listeToPrint = new StringBuilder();
-        for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
-            if (!entry.getKey().getPseudo().equals(pseudo)) {
-                listeToPrint.append("	-").append(entry.getKey().getPseudo());
-                if (entry.getKey().getEtat()) {
-                    listeToPrint.append(" (en ligne)\n");
-                } else {
-                    listeToPrint.append(" (hors ligne)\n");
+        if((listeClients.size()-1)==0){
+            socOut.println("isEmpty");
+        }else {
+            for (Map.Entry<User, Socket> entry : listeClients.entrySet()) {
+                if (!entry.getKey().getPseudo().equals(pseudo)) {
+                    listeToPrint.append("	-").append(entry.getKey().getPseudo());
+                    if (entry.getKey().getEtat()) {
+                        listeToPrint.append(" (en ligne)\n");
+                    } else {
+                        listeToPrint.append(" (hors ligne)\n");
+                    }
                 }
             }
+            socOut.println("\u001B[33mlistToPrint\u001B[0m" + listeToPrint + "\u001B[33m\nA qui voulez-vous parler?\u001B[0m");
         }
-        socOut.println("\u001B[33mlistToPrint\u001B[0m"+listeToPrint+"\u001B[33m\nA qui voulez-vous parler?\u001B[0m");
     }
 
 
 
     public void callAfficherListeGroupes(PrintStream socOut){
+
         StringBuilder listeToPrint = new StringBuilder();
-        for (Groupe groupe : listeGroupes) {
+        if(listeGroupes.isEmpty()){
+            socOut.println("isEmpty");
+        }else {
+            for (Groupe groupe : listeGroupes) {
                 listeToPrint.append("  -").append(groupe.getName()).append("\n");
                 //aficher les membres du groupe
-            for(String p :groupe.getMembres()){
-                listeToPrint.append("\t*").append(p).append("\n");
+                for (String p : groupe.getMembres()) {
+                    listeToPrint.append("\t*").append(p).append("\n");
+                }
+                listeToPrint.append("\n");
             }
-            listeToPrint.append("\n");
+            socOut.println("\u001B[33mlistToPrint\u001B[0m" + listeToPrint + "\u001B[33m\nA qui voulez-vous parler?\u001B[0m");
         }
-        socOut.println("\u001B[33mlistToPrint\u001B[0m"+listeToPrint+"\u001B[33m\nA qui voulez-vous parler?\u001B[0m");
+
     }
 
 
@@ -276,7 +288,7 @@ public class ClientThread
         } else {
             try {
                 mutex.lock();
-                socOut.println("\n\n\n\n\u001B[32m"+afficherConversation(contact)+"\u001B[0m");
+                    socOut.println("\n\n\n\n\u001B[32m"+afficherConversation(contact)+"\u001B[0m");
             } finally {
                 mutex.unlock();
             }
@@ -305,7 +317,7 @@ public class ClientThread
         }else{  // l'utilisateur fait déjà partie du groupe
             try {
                 mutexGroupe.lock();
-                socOut.println("\n\n\n\u001B[35m"+afficherGroupeConversation(nomGroupe)+"\u001B[0m");
+                    socOut.println("\n\n\n\u001B[35m"+afficherGroupeConversation(nomGroupe)+"\u001B[0m");
             } finally {
                 mutexGroupe.unlock();
             }
@@ -357,7 +369,7 @@ public class ClientThread
                                 break;
                             }
                         }
-                        socOutClients.println("\u001B[35m(" + nomGroupe + ") " + pseudo + " : " + line);
+                        socOutClients.println("\u001B[35m(" + nomGroupe + ") " + pseudo + " : " + line+"\u001B[0m");
                     }
                 }
                 try {
