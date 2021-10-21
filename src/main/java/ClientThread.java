@@ -205,7 +205,7 @@ public class ClientThread
                 listeHistorique.append(expediteur).append(" : ").append(objectInArray.get("contenu")).append("\n");
             }
         }
-        return listeHistorique.toString();
+        return listeHistorique.substring(0,listeHistorique.length()-1);
     }
 
 
@@ -219,7 +219,7 @@ public class ClientThread
                 listeHistorique.append(expediteur).append(" : ").append(objectInArray.get("contenu")).append("\n");
             }
         }
-        return listeHistorique.toString();
+        return listeHistorique.substring(0,listeHistorique.length()-1);
     }
 
     public void callAfficherListeClients(PrintStream socOut){
@@ -276,7 +276,7 @@ public class ClientThread
         } else {
             try {
                 mutex.lock();
-                socOut.print("\n\n\n\n"+afficherConversation(contact));
+                socOut.println("\n\n\n\n\u001B[32m"+afficherConversation(contact)+"\u001B[0m");
             } finally {
                 mutex.unlock();
             }
@@ -287,7 +287,7 @@ public class ClientThread
         String nomGroupe = line.substring(18);
         Groupe group = getGroupByName(nomGroupe, listeGroupes);
         if (!listeGroupes.contains(group)) { // vérifier que le groupe existe bien
-            socOut.println(); // on ne renvoie rien pour passer à l'appel ChoisirGroupe de Client.java
+            socOut.println();
         } else if (!listeGroupeContientPseudo(group.getMembres(), pseudo)) { // si l'utilisateur ne fait pas encore partie du groupe on le rajoute
             group.addMember(pseudo);
             try {
@@ -298,14 +298,14 @@ public class ClientThread
             }
             try {
                 mutexGroupe.lock();
-                socOut.print("\n\n\n"+afficherGroupeConversation(nomGroupe));
+                socOut.print("\n\n\n\u001B[35m"+afficherGroupeConversation(nomGroupe)+"\u001B[0m");
             } finally {
                 mutexGroupe.unlock();
             }
         }else{  // l'utilisateur fait déjà partie du groupe
             try {
                 mutexGroupe.lock();
-                socOut.print("\n\n\n"+afficherGroupeConversation(nomGroupe));
+                socOut.println("\n\n\n\u001B[35m"+afficherGroupeConversation(nomGroupe)+"\u001B[0m");
             } finally {
                 mutexGroupe.unlock();
             }
@@ -329,7 +329,7 @@ public class ClientThread
             if (entry.getKey().getPseudo().equals(interlocuteur)) {
                 if(entry.getKey().getEtat()) {
                     PrintStream socOutClients = new PrintStream(entry.getValue().getOutputStream());
-                    socOutClients.println("(Privé) "+ pseudo + " : " + line);
+                    socOutClients.println("\u001B[32m"+ pseudo + " : " + line+"\u001B[0m");
                 }
                 try {
                     mutex.lock();
@@ -357,7 +357,7 @@ public class ClientThread
                                 break;
                             }
                         }
-                        socOutClients.println("(A" + nomGroupe+ ") " + pseudo + " : " + line);
+                        socOutClients.println("\u001B[35m(" + nomGroupe + ") " + pseudo + " : " + line);
                     }
                 }
                 try {

@@ -34,8 +34,8 @@ public class EchoServerMultiThreaded {
             User user;
 
             // Ouverture du fichier json historique des messages
-            jsonHistorique = fillJsonHistorique(jsonHistorique);
-            //jsonMessagesGroupes = fillJsonMessagesGroupes(jsonMessagesGroupes);
+            jsonHistorique = fillJsonHistorique();
+            jsonMessagesGroupes = fillJsonMessagesGroupes();
 
             // Ouverture du JSON USERS
             fillJsonUser();
@@ -75,7 +75,7 @@ public class EchoServerMultiThreaded {
                     listeClients.put(user, clientSocket);
                     user.setEtat(true);
                     //remplir la liste persistante des users
-                    fillListePersistanteUser(pseudo,listeUsersPersistant);
+                    fillListePersistanteUser(pseudo);
                     //initialisation du client
                     ClientThread ct = new ClientThread(clientSocket, pseudo, listeClients, jsonHistorique,mutex, mutexGroupe, listeGroupes, jsonMessagesGroupes, listeGroupsPersistant);
                     ct.start();
@@ -108,7 +108,7 @@ public class EchoServerMultiThreaded {
     }
 
     // On remplit le jsonArray jsonHistorique avec le fichier de conversation historique.json
-    public JSONArray fillJsonHistorique(JSONArray jsonHistorique) throws IOException {
+    public JSONArray fillJsonHistorique() throws IOException {
         JSONParser jsonParser = new JSONParser();
         try (FileReader reader = new FileReader("./historique.json")) {
             //Read JSON file
@@ -120,8 +120,20 @@ public class EchoServerMultiThreaded {
         return jsonHistorique;
     }
 
+    public JSONArray fillJsonMessagesGroupes() throws IOException {
+        JSONParser jsonParser = new JSONParser();
+        try (FileReader reader = new FileReader("./messagesGroupe.json")) {
+            //Read JSON file
+            Object obj = jsonParser.parse(reader);
+            jsonMessagesGroupes = (JSONArray) obj;
+        } catch (FileNotFoundException | ParseException e) {
+            e.printStackTrace();
+        }
+        return jsonMessagesGroupes;
+    }
+
     // ajoute un utilisateur à la liste des utilisateurs persistante
-    public JSONArray fillListePersistanteUser(String pseudo, JSONArray listeUsersPersistant) {
+    public JSONArray fillListePersistanteUser(String pseudo) {
         JSONObject userObject = new JSONObject();
         userObject.put("pseudo", pseudo);
         listeUsersPersistant.add(userObject);

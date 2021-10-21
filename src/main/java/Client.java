@@ -49,11 +49,11 @@ public class Client {
                             mutex.unlock();
                         }
                     }else if(message.startsWith(listUtilisateurs)) {
-                        if(message.equals(listUtilisateurs+"\u001B[33mA qui voulez-vous parler?\u001B[0m")) {
+                        if(message.equals(listUtilisateurs+"\u001B[33m\nA qui voulez-vous parler?\u001B[0m")) {
                             //cas ou aucun utilisateur n'existe dans le base et que la liste affichée lors de l'option 1 est donc vide
                             System.out.println("\u001B[31mDésolé, aucun autre utilisateur ou groupe n'existe pour le moment ! Tapez deux fois Entrée pour revenir au Menu.\u001B[0m");
                         } else {
-                            System.out.println("\u001B[33mVoici la liste des utilisateurs :\n\n\u001B[0m" + message.substring(20)+"\u001B[0m");
+                            System.out.println("\u001B[33mVoici la liste :\n\n\u001B[0m" + message.substring(20)+"\u001B[0m");
                         }
                     }else if(message.startsWith(creationGroupe)) {
                         if(message.equals(creationGroupe+"_error")) {
@@ -120,6 +120,7 @@ public class Client {
 
                 } else { // cas où i ne vaut pas 1 ou 0 donc on veut forcément écrire
                     line = stdIn.readLine(); //on écrit une ligne au clavier
+                    //System.out.println("\u001B[0m");
                     if (line.equals(".")) {
                         socOut.println("déconnexion");
                         closeSession();
@@ -195,7 +196,7 @@ public class Client {
     }
 
     public String creerGroupe() throws IOException {
-        System.out.println("Veuillez renseigner le nom du groupe que vous souhaitez créer :");
+        System.out.println("\u001B[33mVeuillez renseigner le nom du groupe que vous souhaitez créer :\u001B[0m");
         String nomGroupe = stdIn.readLine();
         String retour = "";
         // On tape le pseudo de la personne à qui on veut parler
