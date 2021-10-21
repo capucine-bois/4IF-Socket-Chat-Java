@@ -234,7 +234,7 @@ public class ClientThread
                 }
             }
         }
-        socOut.println("listToPrint"+listeToPrint+"A qui voulez-vous parler?");
+        socOut.println("\u001B[33mlistToPrint\u001B[0m"+listeToPrint+"\u001B[33m\nA qui voulez-vous parler?\u001B[0m");
     }
 
 
@@ -249,7 +249,7 @@ public class ClientThread
             }
             listeToPrint.append("\n");
         }
-        socOut.println("listToPrint"+listeToPrint+"A qui voulez-vous parler?");
+        socOut.println("\u001B[33mlistToPrint\u001B[0m"+listeToPrint+"\u001B[33m\nA qui voulez-vous parler?\u001B[0m");
     }
 
 
@@ -276,7 +276,7 @@ public class ClientThread
         } else {
             try {
                 mutex.lock();
-                socOut.print("\n\n\n"+afficherConversation(contact));
+                socOut.print("\n\n\n\n"+afficherConversation(contact));
             } finally {
                 mutex.unlock();
             }
@@ -317,7 +317,7 @@ public class ClientThread
             if (!entry.getKey().getPseudo().equals(pseudo)) {
                 if(entry.getKey().getEtat()) {
                     PrintStream socOutClients = new PrintStream(entry.getValue().getOutputStream());
-                    socOutClients.println("(A tout le monde) " + pseudo + " : " + line);
+                    socOutClients.println("\u001B[36m(A tout le monde) " + pseudo + " : " + line + "\u001B[0m");
                 }
             }
         }
@@ -329,7 +329,7 @@ public class ClientThread
             if (entry.getKey().getPseudo().equals(interlocuteur)) {
                 if(entry.getKey().getEtat()) {
                     PrintStream socOutClients = new PrintStream(entry.getValue().getOutputStream());
-                    socOutClients.println(pseudo + " : " + line);
+                    socOutClients.println("(Privé) "+ pseudo + " : " + line);
                 }
                 try {
                     mutex.lock();
@@ -357,7 +357,7 @@ public class ClientThread
                                 break;
                             }
                         }
-                        socOutClients.println(pseudo + " : " + line);
+                        socOutClients.println("(A" + nomGroupe+ ") " + pseudo + " : " + line);
                     }
                 }
                 try {
