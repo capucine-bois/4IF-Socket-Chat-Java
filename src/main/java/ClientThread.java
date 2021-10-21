@@ -58,11 +58,11 @@ public class ClientThread
                         inLine = false;
                         System.out.println("Deconnexion from " + clientSocket.getLocalAddress());
                         break;
-                    } else if (line.length() >= 2 && line.startsWith("1:") && !line.substring(2).equals("Revenir au menu"))
+                    } else if (line.length() >= 2 && line.startsWith("1:") && !line.substring(2).equals("**"))
                     {
                         interlocuteur = line.substring(2);
                         callChoixInterlocuteur(line, socOut);
-                    } else if (line.length() >= 2 && line.startsWith("1bis:") && !line.substring(5).equals("Revenir au menu"))
+                    } else if (line.length() >= 2 && line.startsWith("1bis:") && !line.substring(5).equals("**"))
                     {
                         interlocuteur = "group_name" + line.substring(5); // ici interlocuteur = nom groupe
                         callChoixGroupe(line, socOut);
@@ -76,9 +76,7 @@ public class ClientThread
                         callAfficherGroupeConversation(line, socOut);
                     }else if(line.length()>= 11 && line.startsWith("creerGroupe"))
                     {
-                        callCreerGroupe(line.substring(11));
-                        System.out.println("here");
-                        socOut.println("group_created");
+                        callCreerGroupe(line.substring(11),socOut);
                     } else {
                         //DISCUSSION BASIQUE
                         if (!interlocuteur.equals("tous") && !interlocuteur.startsWith("group_name"))
@@ -374,16 +372,27 @@ public class ClientThread
         }
     }
 
-    public void callCreerGroupe(String nomGroupe){
-        ArrayList<String> membre = new ArrayList<>();
-        membre.add(pseudo);
-        Groupe g = new Groupe(nomGroupe,membre);
-        listeGroupes.add(g);
-        try {
-            mutexGroupe.lock();
-            fillJsonGroupe(nomGroupe);
-        } finally {
-            mutexGroupe.unlock();
+    public void callCreerGroupe(String nomGroupe, PrintStream socOut){
+        boolean nonContient = true;
+        for(Groupe g : listeGroupes){
+            if(g.getName().equals(nomGroupe)){
+                nonContient=false;
+            }
+        }
+        if(nonContient){
+            ArrayList<String> membre = new ArrayList<>();
+            membre.add(pseudo);
+            Groupe g = new Groupe(nomGroupe,membre);
+            listeGroupes.add(g);
+            try {
+                mutexGroupe.lock();
+                fillJsonGroupe(nomGroupe);
+            } finally {
+                mutexGroupe.unlock();
+            }
+            socOut.println("group_created");
+        }else{ // un nom du meme groupe existe déjà
+            socOut.println("group_created_error");
         }
     }
 

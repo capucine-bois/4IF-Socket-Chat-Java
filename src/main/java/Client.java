@@ -57,14 +57,18 @@ public class Client {
                         } else {
                             System.out.println("Voici la liste des utilisateurs : \n" + message.substring(11));
                         }
-                    }else if(message.equals(creationGroupe)) {
-                        System.out.println("Le groupe a bien été créé. Cliquez sur Entree pour revenir au Menu");
-                        try {
+                    }else if(message.startsWith(creationGroupe)) {
+                        if(message.equals(creationGroupe+"_error")) {
+                            System.out.println("ERREUR, ce groupe existe déjà, veuillez choisir un autre nom et réessayer d'en créer en revenant au menu (appuyer sur Entree)");
+                        }else {
+                            System.out.println("Le groupe a bien été créé. Cliquez sur Entree pour revenir au Menu");
+                        }try {
                             mutex.lock();
                             i = 1;
                         } finally {
                             mutex.unlock();
                         }
+
                     }else if(message.equals(groupeIntrouvable)){
                         System.out.println("Ce groupe n'existe pas. Cliquez sur Entree pour revenir au Menu");
                         try {
@@ -122,7 +126,7 @@ public class Client {
                         socOut.println("déconnexion");
                         closeSession();
                         System.exit(0);
-                    } else if (line.equals("Revenir au menu")) {
+                    } else if (line.equals("**")) {
                         try {
                             mutex.lock();
                             i=1;
@@ -158,7 +162,7 @@ public class Client {
         String personneChoisie = stdIn.readLine();
         String retour = "";
         // On tape le pseudo de la personne à qui on veut parler
-        if(personneChoisie.equals("Revenir au menu")) {
+        if(personneChoisie.equals("**")) {
             retour = "retour menu";
         }
         else {
@@ -179,7 +183,7 @@ public class Client {
         String groupeChoisi = stdIn.readLine();
         String retour = "";
         // On tape le pseudo de la personne à qui on veut parler
-        if(groupeChoisi.equals("Revenir au menu")) {
+        if(groupeChoisi.equals("**")) {
             retour = "retour menu";
         }
         else {
@@ -196,7 +200,7 @@ public class Client {
         String nomGroupe = stdIn.readLine();
         String retour = "";
         // On tape le pseudo de la personne à qui on veut parler
-        if(nomGroupe.equals("Revenir au menu")) {
+        if(nomGroupe.equals("**")) {
             retour = "retour menu";
         }else{
             socOut.println("creerGroupe"+nomGroupe);
